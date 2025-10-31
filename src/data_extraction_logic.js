@@ -1,8 +1,14 @@
-function getTableofContents(DATA) {
+let contadorGlobal = 0
+const CHECKED_TABLES = []
+
+function getTableofContents (DATA) {
   const { FacturaElectronica } = DATA || {}
   const proveedor = FacturaElectronica?.Emisor?.NombreComercial || 'Proveedor Desconocido'
-  const listaServicios =  structuredClone(FacturaElectronica?.DetalleServicio?.LineaDetalle) || []
-  
+  const listaServicios = structuredClone(FacturaElectronica?.DetalleServicio?.LineaDetalle) || []
+
+  // Aumentamos el contador de tablas
+  const tablaId = generarIdTabla()
+
   // Separamos los detalles por tarifa de impuesto
   const listaImpuestos = listaServicios.reduce((acc, detalle) => {
     // Linea de impuesto del detalle
@@ -15,7 +21,7 @@ function getTableofContents(DATA) {
     const SumaTarifaTotal = parseFloat(acc[impuesto].totalTarifa) + (detalle?.MontoTotalLinea)
     acc[impuesto].servicios.push(detalle)
     acc[impuesto].totalTarifa = SumaTarifaTotal
-    
+
     return acc
   }, {})
 
@@ -28,9 +34,9 @@ function getTableofContents(DATA) {
   const headerRow = document.createElement('tr')
 
   const th = document.createElement('th')
-  th.textContent = "NOMBRE PROVEEDOR"
+  th.textContent = 'NOMBRE PROVEEDOR'
   headerRow.appendChild(th)
- 
+
   // Cuerpo de tabla de contenidos
   const tbody = document.createElement('tbody')
 
@@ -54,6 +60,32 @@ function getTableofContents(DATA) {
     dataRow.appendChild(tdDataTotals)
     tbody.appendChild(dataRow)
   })
+
+  // Crear checkbox para seleccion de tablas
+  const checkTabla = document.createElement('input')
+  checkTabla.type = 'checkbox'
+  checkTabla.classList.add('btn-check')
+  checkTabla.id = `check-${tablaId}`
+  checkTabla.autocomplete = 'off'
+
+  // Evento al seleccionar el checkbox
+  checkTabla.addEventListener('change', (event) => { onCheckTable(event, { tabla: tablaContenidos, key: tablaId }) })
+
+  // Crear el label del checkbox
+  const labelCheck = document.createElement('label')
+  labelCheck.classList.add('btn', 'btn-outline-primary')
+  labelCheck.setAttribute('for', `check-${tablaId}`)
+  labelCheck.textContent = 'Incluir en Reporte'
+
+  // Meter el checkbox dentro de un <th>
+  const thCheckBox = document.createElement('th')
+  thCheckBox.appendChild(checkTabla)
+  thCheckBox.appendChild(labelCheck)
+
+  // Agregar al dataRow
+  headerRow.appendChild(thCheckBox)
+
+  // Ensamblamos la tabla de contenidos
   tHeader.appendChild(headerRow)
   tablaContenidos.appendChild(tHeader)
   tablaContenidos.appendChild(tbody)
@@ -61,5 +93,74 @@ function getTableofContents(DATA) {
   return tablaContenidos
 }
 
+function generarIdTabla () {
+  contadorGlobal += 1
+  return `tabla-${contadorGlobal}`
+}
 
-export { getTableofContents }
+function onCheckTable (event, obTabla) {
+  const isChecked = event.target.checked
+  if (!isChecked) {
+    // Eliminar de CHECKED_TABLES
+    const index = CHECKED_TABLES.findIndex(item => item.key === obTabla.key)
+    if (index > -1) CHECKED_TABLES.splice(index, 1)
+    return
+  }
+  CHECKED_TABLES.push(obTabla)
+}
+
+// Lógica para fusionar las tablas seleccionadas en CHECKED_TABLES
+function fusionarTablasSeleccionadas () {
+  const tablaFusion = document.createElement('table')
+
+  // Obtener todas las columnas únicas
+  const columnasSet = new Set()
+  // Incluir todas las columnas de las tablas seleccionadas; Sin repeticiones
+  CHECKED_TABLES.forEach(({ tabla }) => {
+    tabla.querySelectorAll('thead th').forEach(th => {
+      // Excluir columnas no deseadas
+      if (th.textContent !== 'Incluir en Reporte') {
+        columnasSet.add(th.textContent.trim())
+      }
+    })
+  })
+
+  // Convertir el Set a un Array para iterar después
+  const columnasTablaFusion = Array.from(columnasSet)
+
+  // Crear encabezado de la tabla fusionada
+  const thead = tablaFusion.createTHead()
+  const trHead = document.createElement('tr')
+  // Crear y añadir th para cada columna única
+  columnasTablaFusion.forEach(col => {
+    const th = document.createElement('th')
+    th.textContent = col
+    trHead.appendChild(th)
+  })
+  thead.appendChild(trHead)
+
+  // Copiar filas de cada tabla seleccionada
+  const tbody = tablaFusion.createTBody()
+  CHECKED_TABLES.forEach(({ tabla }) => {
+    // Obtener los encabezados de la tabla original
+    const ths = Array.from(tabla.querySelectorAll('thead th')).map(th => th.textContent.trim())
+
+    // Iterar sobre las filas de la tabla original
+    tabla.querySelectorAll('tbody tr').forEach(fila => {
+      const nuevaFila = document.createElement('tr')
+      // Logica para copiar los datos de las filas que hagan match con las columnas; si no hay match, dejamos en blanco
+      columnasTablaFusion.forEach(col => {
+        const td = document.createElement('td')
+        // Si la tabla tiene esta columna, copiar el valor; si no, dejar en blanco
+        const index = ths.indexOf(col)
+        td.textContent = index > -1 ? fila.children[index].textContent : ''
+        nuevaFila.appendChild(td)
+      })
+      tbody.appendChild(nuevaFila)
+    })
+  })
+
+  return tablaFusion
+}
+
+export { getTableofContents, fusionarTablasSeleccionadas }
