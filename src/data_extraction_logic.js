@@ -1,9 +1,16 @@
+import dayjs from 'dayjs'
+import customParseFormat from 'dayjs/plugin/customParseFormat'
+
+dayjs.extend(customParseFormat)
+
 let contadorGlobal = 0
 const CHECKED_TABLES = []
 
 function getTableofContents (DATA) {
   const { FacturaElectronica } = DATA || {}
   const proveedor = FacturaElectronica?.Emisor?.NombreComercial || 'Proveedor Desconocido'
+  const receptor = FacturaElectronica?.Receptor?.Nombre || 'Receptor Desconocido'
+  const fechaEmision = dayjs(FacturaElectronica.FechaEmision).format('YYYY/MM/DD') || 'Fecha Desconocida'
   const listaServicios = structuredClone(FacturaElectronica?.DetalleServicio?.LineaDetalle) || []
 
   // Aumentamos el contador de tablas
@@ -33,9 +40,17 @@ function getTableofContents (DATA) {
   const tHeader = document.createElement('thead')
   const headerRow = document.createElement('tr')
 
-  const th = document.createElement('th')
-  th.textContent = 'NOMBRE PROVEEDOR'
-  headerRow.appendChild(th)
+  const thProveedor = document.createElement('th')
+  thProveedor.textContent = 'NOMBRE PROVEEDOR'
+  headerRow.appendChild(thProveedor)
+
+  const thReceptor = document.createElement('th')
+  thReceptor.textContent = 'NOMBRE RECEPTOR'
+  headerRow.appendChild(thReceptor)
+
+  const thFechaEmision = document.createElement('th')
+  thFechaEmision.textContent = 'FECHA EMISIÓN'
+  headerRow.appendChild(thFechaEmision)
 
   // Cuerpo de tabla de contenidos
   const tbody = document.createElement('tbody')
@@ -47,6 +62,16 @@ function getTableofContents (DATA) {
   const tdProveedor = document.createElement('td')
   tdProveedor.textContent = proveedor
   dataRow.appendChild(tdProveedor)
+
+  // Nombre del receptor
+  const tdReceptor = document.createElement('td')
+  tdReceptor.textContent = receptor
+  dataRow.appendChild(tdReceptor)
+
+  // Fecha de emisión
+  const tdFechaEmision = document.createElement('td')
+  tdFechaEmision.textContent = fechaEmision
+  dataRow.appendChild(tdFechaEmision)
 
   Object.entries(listaImpuestos).forEach(([tarifa, info]) => {
     // Encabezados
