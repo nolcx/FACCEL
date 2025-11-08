@@ -11,6 +11,10 @@
       crossorigin="anonymous"
     />
     <link rel="stylesheet" href="./src/style.css" />
+    <link
+      rel="stylesheet"
+      href="./node_modules/bootstrap-icons/font/bootstrap-icons.css"
+    />
   </head>
   <body>
     <div class="main-container">
@@ -22,6 +26,42 @@
       <button type="button" class="btn btn-success mt-2 export-button">
         Generar Reporte
       </button>
+      <!-- Boton selector de filtros -->
+      <div class="btn-group mt-2">
+        <button
+          type="button"
+          class="btn btn-secondary dropdown-toggle"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+        >
+          Filtrar
+        </button>
+        <ul class="dropdown-menu">
+          <li>
+            <a class="dropdown-item filter-date-option" href="#"
+              >Fecha emisión</a
+            >
+          </li>
+          <li>
+            <a class="dropdown-item filter-receptor-option" href="#"
+              >Receptor</a
+            >
+          </li>
+          <li>
+            <a class="dropdown-item filter-provider-option" href="#"
+              >Proveedor</a
+            >
+          </li>
+        </ul>
+      </div>
+      <input
+        type="date"
+        class="form-control mt-2 invisible date-filter-input"
+        placeholder="Username"
+        aria-label="Username"
+      />
+      <!-- Selected Filters Bubble List -->
+      <div class="filter-bubble-list"></div>
     </div>
     <script type="module" src="./src/main.js"></script>
     <script
