@@ -10,7 +10,7 @@
       integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
       crossorigin="anonymous"
     />
-    <link rel="stylesheet" href="./src/style.css" />
+    <link rel="stylesheet" href="./src/assets/style.css" />
     <link
       rel="stylesheet"
       href="./node_modules/bootstrap-icons/font/bootstrap-icons.css"
@@ -34,12 +34,17 @@
           data-bs-toggle="dropdown"
           aria-expanded="false"
         >
-          Filtrar
+          Filtrar por
         </button>
         <ul class="dropdown-menu">
           <li>
             <a class="dropdown-item filter-date-option" href="#"
-              >Fecha emisión</a
+              >Fecha Emisión</a
+            >
+          </li>
+          <li>
+            <a class="dropdown-item filter-between-date-option" href="#"
+              >Entre Fechas</a
             >
           </li>
           <li>
@@ -57,9 +62,30 @@
       <input
         type="date"
         class="form-control mt-2 invisible date-filter-input"
-        placeholder="Username"
-        aria-label="Username"
+        placeholder="Fecha Emisión"
+        aria-label="date-filter-input"
       />
+      <!-- Inputs Filter Between Dates -->
+      <div class="filter-between-dates-container invisible">
+        <span>Desde el:</span>
+        <input
+          type="date"
+          class="form-control mt-2 date-filter-input-start"
+          placeholder="Fecha Emisión"
+          aria-label="date-filter-input"
+        />
+        <span>Hasta el:</span>
+        <input
+          type="date"
+          class="form-control mt-2 date-filter-input-end"
+          placeholder="Fecha Emisión"
+          aria-label="date-filter-input"
+        />
+        <button class="btn btn-info btn-filter-between-dates mt-2">
+          Filtrar
+        </button>
+      </div>
+
       <!-- Selected Filters Bubble List -->
       <div class="filter-bubble-list"></div>
     </div>

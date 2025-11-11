@@ -1,7 +1,5 @@
-import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
-
-dayjs.extend(customParseFormat)
+import { parseDate } from './Utils/DateOperations.js'
 
 let contadorGlobal = 0
 const CHECKED_TABLES = []
@@ -10,7 +8,7 @@ function getTableofContents (DATA) {
   const { FacturaElectronica } = DATA || {}
   const proveedor = FacturaElectronica?.Emisor?.NombreComercial || 'Proveedor Desconocido'
   const receptor = FacturaElectronica?.Receptor?.Nombre || 'Receptor Desconocido'
-  const fechaEmision = dayjs(FacturaElectronica.FechaEmision).format('YYYY/MM/DD') || 'Fecha Desconocida'
+  const fechaEmision = parseDate(FacturaElectronica.FechaEmision) || 'Fecha Desconocida'
   const listaServicios = structuredClone(FacturaElectronica?.DetalleServicio?.LineaDetalle) || []
 
   // Aumentamos el contador de tablas
