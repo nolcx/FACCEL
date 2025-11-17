@@ -1,34 +1,12 @@
-import customParseFormat from 'dayjs/plugin/customParseFormat'
-import { parseDate } from './Utils/DateOperations.js'
-
 let contadorGlobal = 0
 const CHECKED_TABLES = []
 
-function getTableofContents (DATA) {
-  const { FacturaElectronica } = DATA || {}
-  const proveedor = FacturaElectronica?.Emisor?.NombreComercial || 'Proveedor Desconocido'
-  const receptor = FacturaElectronica?.Receptor?.Nombre || 'Receptor Desconocido'
-  const fechaEmision = parseDate(FacturaElectronica.FechaEmision) || 'Fecha Desconocida'
-  const listaServicios = structuredClone(FacturaElectronica?.DetalleServicio?.LineaDetalle) || []
+function getTablaFactura (dataFacturas = null) {
+  if (!dataFacturas || dataFacturas.length === 0) return 'No hay facturas para mostrar.'
+  const { receptor, proveedor, fechaEmision, listaImpuestos } = dataFacturas
 
   // Aumentamos el contador de tablas
   const tablaId = generarIdTabla()
-
-  // Separamos los detalles por tarifa de impuesto
-  const listaImpuestos = listaServicios.reduce((acc, detalle) => {
-    // Linea de impuesto del detalle
-    const impuesto = detalle?.Impuesto?.Tarifa || {}
-
-    // Verificar si ya existe la tarifa de impuesto en el acumulador
-    if (!acc[impuesto]) acc[impuesto] = { servicios: [], totalTarifa: 0 }
-
-    // Sumar el monto total de la línea al total de tarifa del impuesto
-    const SumaTarifaTotal = parseFloat(acc[impuesto].totalTarifa) + (detalle?.MontoTotalLinea)
-    acc[impuesto].servicios.push(detalle)
-    acc[impuesto].totalTarifa = SumaTarifaTotal
-
-    return acc
-  }, {})
 
   // Generamos tabla de contenidos
   const tablaContenidos = document.createElement('table')
@@ -133,7 +111,7 @@ function onCheckTable (event, obTabla) {
 }
 
 // Lógica para fusionar las tablas seleccionadas en CHECKED_TABLES
-function fusionarTablasSeleccionadas () {
+function getTablaFusion () {
   const tablaFusion = document.createElement('table')
 
   // Obtener todas las columnas únicas
@@ -186,4 +164,4 @@ function fusionarTablasSeleccionadas () {
   return tablaFusion
 }
 
-export { getTableofContents, fusionarTablasSeleccionadas }
+export { getTablaFactura, getTablaFusion }

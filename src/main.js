@@ -1,11 +1,13 @@
+/* global FileReader */
 import { XMLParser } from 'fast-xml-parser'
-import { getTableofContents, fusionarTablasSeleccionadas } from './data_extraction_logic.js'
-import { exportarReporteExcel } from './Utils/ExportTable.js'
-import { getFilterBubble } from './Components/FilterBubble.js'
-import { parseDate, isBetweenDates } from './Utils/DateOperations.js'
+import { getDataFactura } from './data/XMLDataExtraction.js'
+import { getTablaFactura, getTablaFusion } from './components/BillsTable.js'
+import { exportarReporteExcel } from './utils/ExportTable.js'
+import { getFilterBubble } from './components/FilterBubble.js'
+import { parseDate, isBetweenDates } from './utils/DateOperations.js'
 
-// Contenedor principal
-const mainContainer = document.getElementsByClassName('main-container')[0]
+// Contenedor de las tablas de facturas
+const billsContainer = document.getElementsByClassName('bills-container')[0]
 
 // Lista de Facturas
 const FACTURAS = []
@@ -37,16 +39,27 @@ XMLFile.addEventListener('change', (event) => {
   const file = event.target.files[0]
   if (!file) return
   if (!file.name.endsWith('.xml')) return
+
   // Crear un FileReader para leer el contenido del archivo
   const reader = new FileReader()
   reader.onload = function (e) {
     const XMLContent = e.target.result
     const XMLParseado = parser.parse(XMLContent)
+
+    // Parsear la data del XML relacionada a la factura
+    const dataFactura = getDataFactura(XMLParseado)
     // Obtener la tabla de contenidos generada; con la data extraida del XML importado
-    const tablaContenidos = getTableofContents(XMLParseado)
-    // Insertar la tabla de contenidos en el contenedor principal
-    mainContainer.appendChild(tablaContenidos)
-    FACTURAS.push(XMLParseado.FacturaElectronica)
+    const tablaFactura = getTablaFactura(dataFactura)
+
+    // Guardar la factura en la lista de facturas
+    const factura = {
+      dataFactura: XMLParseado.FacturaElectronica,
+      tablaFactura
+    }
+    FACTURAS.push(factura)
+
+    // Renderizar las tablas de las facturas
+    renderTablasFacturas()
   }
   reader.readAsText(file)
 })
@@ -74,7 +87,7 @@ btnFilterBetweenDates.addEventListener('click', () => {
   const fechaFin = document.getElementsByClassName('date-filter-input-end')[0].value
   console.log('Filtrando entre fechas:', fechaInicio, fechaFin)
   filterBetweenDatesContainer.classList.add('invisible')
-  const facturasFiltradas = FACTURAS.filter((factura) => isBetweenDates(parseDate(factura.FechaEmision), parseDate(fechaInicio), parseDate(fechaFin)))
+  const facturasFiltradas = FACTURAS.filter((factura) => isBetweenDates(parseDate(factura.dataFactura.FechaEmision), parseDate(fechaInicio), parseDate(fechaFin)))
   console.log(facturasFiltradas)
 })
 
@@ -96,23 +109,35 @@ dateFilterInput.addEventListener('change', (event) => {
   const selectedDate = event.target.value
   console.log('Fecha seleccionada:', selectedDate)
   dateFilterInput.classList.add('invisible')
+
   // Crear y agregar el filter bubble
   const filterBubble = getFilterBubble('date', selectedDate)
   filterBubbleList.appendChild(filterBubble)
-  console.log(filtrarPorFecha(selectedDate))
+
+  // Obtenemos las facturas filtradas por fecha de emisión.
+  const facturasFiltradas = filtrarPorFecha(selectedDate)
+  renderTablasFacturas(facturasFiltradas)
 })
+
+// Función para limpiar y renderizar las tablas de las facturas en el contenedor de facturas
+function renderTablasFacturas (facturas = FACTURAS) {
+  billsContainer.innerHTML = ''
+  facturas.forEach((factura) => {
+    billsContainer.appendChild(factura.tablaFactura)
+  })
+}
 
 // Filtrar por fecha
 function filtrarPorFecha (fecha) {
   console.log('Filtrando por fecha:', fecha)
-  const facturasFiltradas = FACTURAS.filter((factura) => parseDate(factura.FechaEmision) === parseDate(fecha))
+  const facturasFiltradas = FACTURAS.filter((factura) => parseDate(factura.dataFactura.FechaEmision) === parseDate(fecha))
   return facturasFiltradas
 }
 
 // Función para eventar la exportación de la tabla fusionada
 function exportarTablaFusionada (e) {
   // Obtener la tabla fusionada
-  const tablaFusionada = fusionarTablasSeleccionadas()
+  const tablaFusionada = getTablaFusion()
   // Exportar la tabla fusionada a Excel
   exportarReporteExcel(tablaFusionada)
 }
