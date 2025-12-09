@@ -1,12 +1,8 @@
-let contadorGlobal = 0
 const CHECKED_TABLES = []
 
-function getTablaFactura (dataFacturas = null) {
+function getTablaFactura (idFactura, dataFacturas = null, descartarFactura) {
   if (!dataFacturas || dataFacturas.length === 0) return 'No hay facturas para mostrar.'
   const { receptor, proveedor, fechaEmision, listaImpuestos } = dataFacturas
-
-  // Aumentamos el contador de tablas
-  const tablaId = generarIdTabla()
 
   // Generamos tabla de contenidos
   const tablaContenidos = document.createElement('table')
@@ -66,16 +62,13 @@ function getTablaFactura (dataFacturas = null) {
   const checkTabla = document.createElement('input')
   checkTabla.type = 'checkbox'
   checkTabla.classList.add('btn-check')
-  checkTabla.id = `check-${tablaId}`
+  checkTabla.id = `check-${idFactura}`
   checkTabla.autocomplete = 'off'
-
-  // Evento al seleccionar el checkbox
-  checkTabla.addEventListener('change', (event) => { onCheckTable(event, { tabla: tablaContenidos, key: tablaId }) })
 
   // Crear el label del checkbox
   const labelCheck = document.createElement('label')
   labelCheck.classList.add('btn', 'btn-outline-primary')
-  labelCheck.setAttribute('for', `check-${tablaId}`)
+  labelCheck.setAttribute('for', `check-${idFactura}`)
   labelCheck.textContent = 'Incluir en Reporte'
 
   // Meter el checkbox dentro de un <th>
@@ -83,8 +76,29 @@ function getTablaFactura (dataFacturas = null) {
   thCheckBox.appendChild(checkTabla)
   thCheckBox.appendChild(labelCheck)
 
-  // Agregar al dataRow
+  // Evento al seleccionar el checkbox
+  checkTabla.addEventListener('change', (event) => { onCheckTable(event, { tabla: tablaContenidos, key: idFactura }) })
+
+  // Agregar el checkbox al dataRow
   headerRow.appendChild(thCheckBox)
+
+  // Crear boton para descartar la factura
+  const btnDescartarFactura = document.createElement('input')
+  btnDescartarFactura.type = 'button'
+  btnDescartarFactura.classList.add('btn', 'btn-danger')
+  btnDescartarFactura.id = `discard-${idFactura}`
+  btnDescartarFactura.value = 'Descartar Factura'
+  btnDescartarFactura.autocomplete = 'off'
+
+  // Meter el boton dentro de un <th>
+  const thDiscardButton = document.createElement('th')
+  thDiscardButton.appendChild(btnDescartarFactura)
+
+  // Evento para descartar la factura
+  btnDescartarFactura.addEventListener('click', (event) => { onDescartarFactura(event, idFactura, descartarFactura) })
+
+  // Agregar el boton de descartar al dataRow
+  headerRow.appendChild(thDiscardButton)
 
   // Ensamblamos la tabla de contenidos
   tHeader.appendChild(headerRow)
@@ -92,11 +106,6 @@ function getTablaFactura (dataFacturas = null) {
   tablaContenidos.appendChild(tbody)
 
   return tablaContenidos
-}
-
-function generarIdTabla () {
-  contadorGlobal += 1
-  return `tabla-${contadorGlobal}`
 }
 
 function onCheckTable (event, obTabla) {
@@ -108,6 +117,12 @@ function onCheckTable (event, obTabla) {
     return
   }
   CHECKED_TABLES.push(obTabla)
+}
+
+function onDescartarFactura (event, idFactura, descartarFactura) {
+  console.log('Descartando factura con id:', idFactura)
+  event.preventDefault()
+  descartarFactura(idFactura)
 }
 
 // Lógica para fusionar las tablas seleccionadas en CHECKED_TABLES
@@ -154,7 +169,7 @@ function getTablaFusion () {
         const td = document.createElement('td')
         // Si la tabla tiene esta columna, copiar el valor; si no, dejar en blanco
         const index = ths.indexOf(col)
-        td.textContent = index > -1 ? fila.children[index].textContent : ''
+        td.textContent = index > -1 ? fila.children[index]?.textContent : ''
         nuevaFila.appendChild(td)
       })
       tbody.appendChild(nuevaFila)

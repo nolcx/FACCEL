@@ -9,6 +9,9 @@ import { parseDate, isBetweenDates } from './utils/DateOperations.js'
 // Contenedor de las tablas de facturas
 const billsContainer = document.getElementsByClassName('bills-container')[0]
 
+// Contador global de facturas
+let contadorGlobal = 0
+
 // Lista de Facturas
 const FACTURAS = []
 
@@ -48,11 +51,14 @@ XMLFile.addEventListener('change', (event) => {
 
     // Parsear la data del XML relacionada a la factura
     const dataFactura = getDataFactura(XMLParseado)
+    // Obtener el id de la factura
+    const idFactura = getIdFactura()
     // Obtener la tabla de contenidos generada; con la data extraida del XML importado
-    const tablaFactura = getTablaFactura(dataFactura)
+    const tablaFactura = getTablaFactura(idFactura, dataFactura, descartarFactura)
 
     // Guardar la factura en la lista de facturas
     const factura = {
+      idFactura,
       dataFactura: XMLParseado.FacturaElectronica,
       tablaFactura
     }
@@ -85,10 +91,12 @@ filterBetweenDatesOption.addEventListener('click', () => {
 btnFilterBetweenDates.addEventListener('click', () => {
   const fechaInicio = document.getElementsByClassName('date-filter-input-start')[0].value
   const fechaFin = document.getElementsByClassName('date-filter-input-end')[0].value
-  console.log('Filtrando entre fechas:', fechaInicio, fechaFin)
+  // Mostrar el filter bubble
   filterBetweenDatesContainer.classList.add('invisible')
+  // Filtrar las facturas entre las fechas seleccionadas
   const facturasFiltradas = FACTURAS.filter((factura) => isBetweenDates(parseDate(factura.dataFactura.FechaEmision), parseDate(fechaInicio), parseDate(fechaFin)))
-  console.log(facturasFiltradas)
+
+  renderTablasFacturas(facturasFiltradas)
 })
 
 // Evento para filtrar por receptor
@@ -127,6 +135,19 @@ function renderTablasFacturas (facturas = FACTURAS) {
   })
 }
 
+// Funcion para descartar una factura por identificador
+function descartarFactura (idFactura) {
+  if (!idFactura) return
+  const indexFactura = FACTURAS.findIndex(factura => factura.idFactura === idFactura)
+  FACTURAS.splice(indexFactura, 1)
+  renderTablasFacturas()
+}
+
+function getIdFactura () {
+  contadorGlobal += 1
+  return `factura-${contadorGlobal}`
+}
+
 // Filtrar por fecha
 function filtrarPorFecha (fecha) {
   console.log('Filtrando por fecha:', fecha)
@@ -136,6 +157,7 @@ function filtrarPorFecha (fecha) {
 
 // Función para eventar la exportación de la tabla fusionada
 function exportarTablaFusionada (e) {
+  e.preventDefault()
   // Obtener la tabla fusionada
   const tablaFusionada = getTablaFusion()
   // Exportar la tabla fusionada a Excel
