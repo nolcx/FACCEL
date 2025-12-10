@@ -1,6 +1,6 @@
-function getFilterBubble (type, value, event) {
+function getFilterBubble (type, value, descartarFiltro, idFiltro) {
   const bubble = document.createElement('div')
-  bubble.classList.add('filter-bubble')
+  bubble.classList.add('filter-bubble', `filter-bubble-${idFiltro}`)
   // Si el tipo es fecha, color amarillo claro
   switch (type) {
     case 'date':
@@ -24,6 +24,9 @@ function getFilterBubble (type, value, event) {
   removeIcon.addEventListener('click', () => {
     console.log('Eliminando burbuja de filtro:', value)
     bubble.remove()
+
+    // Evento para descartar el filtro asociado
+    descartarFiltro(idFiltro)
   })
 
   return bubble

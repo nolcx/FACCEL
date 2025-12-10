@@ -19,75 +19,63 @@
   <body>
     <div class="main-container">
       <h1>¡Bienvenid@ a FACCEL! 👋</h1>
+
       <label for="formFile" class="form-label"
         >Adjunte aquí los archivos XML a procesar.</label
       >
-      <input class="form-control xml_input_form" type="file" id="formFile" />
-      <button type="button" class="btn btn-success mt-2 export-button">
-        Generar Reporte
-      </button>
-      <!-- Boton selector de filtros -->
-      <div class="btn-group mt-2">
-        <button
-          type="button"
-          class="btn btn-secondary dropdown-toggle"
-          data-bs-toggle="dropdown"
-          aria-expanded="false"
-        >
-          Filtrar por
-        </button>
-        <ul class="dropdown-menu">
-          <li>
-            <a class="dropdown-item filter-date-option" href="#"
-              >Fecha Emisión</a
-            >
-          </li>
-          <li>
-            <a class="dropdown-item filter-between-date-option" href="#"
-              >Entre Fechas</a
-            >
-          </li>
-          <li>
-            <a class="dropdown-item filter-receptor-option" href="#"
-              >Receptor</a
-            >
-          </li>
-          <li>
-            <a class="dropdown-item filter-provider-option" href="#"
-              >Proveedor</a
-            >
-          </li>
-        </ul>
-      </div>
+
+      <!-- Files Input -->
       <input
-        type="date"
-        class="form-control mt-2 invisible date-filter-input"
-        placeholder="Fecha Emisión"
-        aria-label="date-filter-input"
+        class="form-control xml_input_form w-25"
+        type="file"
+        id="formFile"
       />
-      <!-- Inputs Filter Between Dates -->
-      <div class="filter-between-dates-container invisible">
-        <span>Desde el:</span>
-        <input
-          type="date"
-          class="form-control mt-2 date-filter-input-start"
-          placeholder="Fecha Emisión"
-          aria-label="date-filter-input"
-        />
-        <span>Hasta el:</span>
-        <input
-          type="date"
-          class="form-control mt-2 date-filter-input-end"
-          placeholder="Fecha Emisión"
-          aria-label="date-filter-input"
-        />
-        <button class="btn btn-info btn-filter-between-dates mt-2">
-          Filtrar
+
+      <!-- Tool Kit -->
+      <div class="toolkit-container">
+        <button type="button" class="btn btn-success mt-2 export-button">
+          Generar Reporte
         </button>
+
+        <!-- Boton selector de filtros -->
+        <div class="btn-group mt-2">
+          <button
+            type="button"
+            class="btn btn-secondary dropdown-toggle"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            Filtrar por:
+          </button>
+          <ul class="dropdown-menu">
+            <li>
+              <a class="dropdown-item filter-date-option" href="#"
+                >Fecha Emisión</a
+              >
+            </li>
+            <li>
+              <a class="dropdown-item filter-between-date-option" href="#"
+                >Entre Fechas</a
+              >
+            </li>
+            <li>
+              <a class="dropdown-item filter-receptor-option" href="#"
+                >Receptor</a
+              >
+            </li>
+            <li>
+              <a class="dropdown-item filter-provider-option" href="#"
+                >Proveedor</a
+              >
+            </li>
+          </ul>
+        </div>
       </div>
 
       <!-- Selected Filters Bubble List -->
-      <div class="filter-bubble-list"></div>
+      <div class="d-flex flex-wrap mt-2 filter-bubble-list"></div>
+
+      <!-- Bills Container -->
       <div class="bills-container"></div>
     </div>
     <script type="module" src="./src/main.js"></script>

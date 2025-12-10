@@ -7,19 +7,19 @@ body {
 }
 
 body {
-  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 0;
   background-color: #25252588;
 }
 
 .main-container {
   /* centrar vertical y horizontalmente */
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
   padding: 20px;
   background-color: white;
   border-radius: 10px;
+  width: 90%;
 }
 
 .filter-bubble {
