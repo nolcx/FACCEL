@@ -1,7 +1,8 @@
 /* global FileReader */
 import { XMLParser } from 'fast-xml-parser'
+import { InfoToasty, SuccessToasty, WarningToasty } from './components/Toastifys.js'
 import { getDataFactura } from './data/XMLDataExtraction.js'
-import { getTablaFactura, getTablaFusion } from './components/BillsTable.js'
+import { getTablaFactura, getTablaFusion, limpiarTablasSeleccionadas } from './components/BillsTable.js'
 import { exportarReporteExcel } from './Utils/ExportTable.js'
 import { getFilterBubble } from './components/FilterBubble.js'
 import { crearCustomDropdown } from './components/CustomDropDown.js'
@@ -10,7 +11,7 @@ import { crearFilterEmitionDate } from './components/FilterEmitionDate.js'
 import { parseDate, isSameDate, isBetweenDates } from './utils/DateOperations.js'
 
 // Importar constantes
-import { FACTURAS, FILTROS, TIPOS_FILTROS, TIPOS_FILTER_BUBBLES } from './config/constants.js'
+import { FACTURAS, CHECKED_TABLES, FILTROS, TIPOS_FILTROS, TIPOS_FILTER_BUBBLES } from './config/constants.js'
 
 // Contador global de facturas
 let contadorGlobal = 0
@@ -175,9 +176,18 @@ function descartarFiltro (idFiltro) {
 
 function onFiltroAgregado () {
   const facturasFiltradas = getFacturasFiltradas()
+
+  // Si hay tablas seleccionadas, limpiarlas
+  if (CHECKED_TABLES.length > 0) {
+    // Limpiar las tablas seleccionadas
+    limpiarTablasSeleccionadas()
+    InfoToasty('Se han limpiado las tablas seleccionadas debido a la aplicación de nuevos filtros.')
+  }
+
   // Mostrar el header de filter bubbles
   document.getElementsByClassName('header-filter-list')[0].classList.remove('d-none')
   renderTablasFacturas(facturasFiltradas)
+  InfoToasty(`${facturasFiltradas.length} factura(s) encontrada(s) con los filtros aplicados.`)
 }
 
 // Filtrar por fecha
@@ -338,10 +348,10 @@ function getReceptores (facturas = FACTURAS) {
 function exportarTablaFusionada (e) {
   e.preventDefault()
   // Validar si el componente es null (es decir, no hay tablas seleccionadas)
-  if (!getTablaFusion()) return
-
+  if (!getTablaFusion()) return WarningToasty('No hay facturas seleccionadas para exportar.')
   // Obtener la tabla fusionada
   const tablaFusionada = getTablaFusion()
   // Exportar la tabla fusionada a Excel
   exportarReporteExcel(tablaFusionada)
+  return SuccessToasty('Reporte exportado exitosamente.')
 }

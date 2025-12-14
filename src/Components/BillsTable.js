@@ -196,4 +196,15 @@ function getTablaFusion () {
   return tablaFusion
 }
 
-export { getTablaFactura, getTablaFusion }
+// Funcion para deseleccionar todas las tablas
+function limpiarTablasSeleccionadas () {
+  // Limpiar las tablas seleccionadas
+  CHECKED_TABLES.length = 0
+  // Desmarcar todos los checkboxes en la interfaz
+  const checkboxes = document.querySelectorAll('input[type="checkbox"].btn-check')
+  checkboxes.forEach(checkbox => {
+    checkbox.checked = false
+  })
+}
+
+export { getTablaFactura, getTablaFusion, limpiarTablasSeleccionadas }
