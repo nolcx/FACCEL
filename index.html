@@ -5,10 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FACCEL</title>
     <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
       rel="stylesheet"
-      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
-      crossorigin="anonymous"
+      href="./node_modules/bootstrap/dist/css/bootstrap.min.css"
     />
     <link rel="stylesheet" href="./src/assets/style.css" />
     <link
@@ -32,7 +30,7 @@
       />
 
       <!-- Tool Kit -->
-      <div class="toolkit-container">
+      <div class="toolkit-container mb-3">
         <button type="button" class="btn btn-success mt-2 export-button">
           Generar Reporte
         </button>
@@ -73,16 +71,14 @@
       </div>
 
       <!-- Selected Filters Bubble List -->
-      <div class="d-flex flex-wrap mt-2 filter-bubble-list"></div>
+      <h2 class="header-filter-list d-none">🗃️ Listado de Filtros</h2>
+      <div class="d-flex flex-wrap mt-2 mb-2 gap-3 filter-bubble-list"></div>
 
       <!-- Bills Container -->
+      <h2 class="header-list-bills d-none">📋 Listado de Facturas</h2>
       <div class="bills-container"></div>
     </div>
     <script type="module" src="./src/main.js"></script>
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
-      crossorigin="anonymous"
-    ></script>
+    <script src="./node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>
