@@ -1,4 +1,4 @@
-const CHECKED_TABLES = []
+import { CHECKED_TABLES } from '../config/constants.js'
 
 function getTablaFactura (idFactura, dataFacturas = null, descartarFactura) {
   if (!dataFacturas || dataFacturas.length === 0) return 'No hay facturas para mostrar.'
@@ -139,6 +139,7 @@ function onDescartarFactura (event, idFactura, descartarFactura) {
 
 // Lógica para fusionar las tablas seleccionadas en CHECKED_TABLES
 function getTablaFusion () {
+  if (CHECKED_TABLES.length === 0) return null
   const tablaFusion = document.createElement('table')
 
   // Obtener todas las columnas únicas
@@ -153,8 +154,12 @@ function getTablaFusion () {
     })
   })
 
-  // Convertir el Set a un Array para iterar después
-  const columnasTablaFusion = Array.from(columnasSet)
+  // Convertir el Set a un Array para iterar y después ordenar las columnas segun el % de impuesto.
+  const columnasTablaFusion = Array.from(columnasSet).sort((a, b) => {
+    const impuestoA = parseFloat(a.match(/Ventas al (\d+)%/)?.[1] || '0')
+    const impuestoB = parseFloat(b.match(/Ventas al (\d+)%/)?.[1] || '0')
+    return impuestoA - impuestoB
+  })
 
   // Crear encabezado de la tabla fusionada
   const thead = tablaFusion.createTHead()

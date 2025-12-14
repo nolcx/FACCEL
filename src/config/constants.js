@@ -1,6 +1,9 @@
 // Lista de Facturas
 const FACTURAS = []
 
+// Lista de tablas seleccionadas para exportar
+const CHECKED_TABLES = []
+
 // Lista de Filtros
 const FILTROS = []
 
@@ -21,6 +24,7 @@ const TIPOS_FILTER_BUBBLES = {
 
 export {
   FACTURAS,
+  CHECKED_TABLES,
   FILTROS,
   TIPOS_FILTROS,
   TIPOS_FILTER_BUBBLES

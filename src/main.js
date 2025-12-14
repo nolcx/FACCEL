@@ -337,6 +337,9 @@ function getReceptores (facturas = FACTURAS) {
 // Función para eventar la exportación de la tabla fusionada
 function exportarTablaFusionada (e) {
   e.preventDefault()
+  // Validar si el componente es null (es decir, no hay tablas seleccionadas)
+  if (!getTablaFusion()) return
+
   // Obtener la tabla fusionada
   const tablaFusionada = getTablaFusion()
   // Exportar la tabla fusionada a Excel
