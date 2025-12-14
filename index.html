@@ -31,43 +31,59 @@
 
       <!-- Tool Kit -->
       <div class="toolkit-container mb-3">
+        <!-- Button of report generation -->
         <button type="button" class="btn btn-success mt-2 export-button">
+          <i class="bi bi-file-earmark-arrow-down-fill"></i>
           Generar Reporte
         </button>
 
-        <!-- Boton selector de filtros -->
+        <!-- Dropdown selector of filters -->
         <div class="btn-group mt-2">
           <button
             type="button"
-            class="btn btn-secondary dropdown-toggle"
+            class="btn btn-primary dropdown-toggle"
             data-bs-toggle="dropdown"
             aria-expanded="false"
           >
+            <i class="bi bi-funnel-fill"></i>
             Filtrar por:
           </button>
           <ul class="dropdown-menu">
             <li>
-              <a class="dropdown-item filter-date-option" href="#"
-                >Fecha Emisión</a
-              >
+              <a class="dropdown-item filter-date-option" href="#">
+                <i class="bi bi-calendar-date-fill"></i>
+                Fecha Emisión
+              </a>
             </li>
             <li>
-              <a class="dropdown-item filter-between-date-option" href="#"
-                >Entre Fechas</a
-              >
+              <a class="dropdown-item filter-between-date-option" href="#">
+                <i class="bi bi-calendar3"></i>
+                Entre Fechas
+              </a>
             </li>
             <li>
-              <a class="dropdown-item filter-receptor-option" href="#"
-                >Receptor</a
-              >
+              <a class="dropdown-item filter-receptor-option" href="#">
+                <i class="bi bi-person-fill-down"></i>
+                Receptor
+              </a>
             </li>
             <li>
-              <a class="dropdown-item filter-provider-option" href="#"
-                >Proveedor</a
-              >
+              <a class="dropdown-item filter-provider-option" href="#">
+                <i class="bi bi-person-fill-up"></i>
+                Proveedor
+              </a>
             </li>
           </ul>
         </div>
+
+        <!-- Button to select all the bills -->
+        <button
+          type="button"
+          class="btn btn-secondary mt-2 bills-select-all-button"
+        >
+          <i class="bi bi-clipboard2-check-fill"></i>
+          Seleccionar todas
+        </button>
       </div>
 
       <!-- Selected Filters Bubble List -->

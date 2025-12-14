@@ -2,7 +2,7 @@
 import { XMLParser } from 'fast-xml-parser'
 import { InfoToasty, SuccessToasty, WarningToasty } from './components/Toastifys.js'
 import { getDataFactura } from './data/XMLDataExtraction.js'
-import { getTablaFactura, getTablaFusion, limpiarTablasSeleccionadas } from './components/BillsTable.js'
+import { getTablaFactura, getTablaFusion, limpiarTablasSeleccionadas, seleccionarTodasTablas } from './components/BillsTable.js'
 import { exportarReporteExcel } from './Utils/ExportTable.js'
 import { getFilterBubble } from './components/FilterBubble.js'
 import { crearCustomDropdown } from './components/CustomDropDown.js'
@@ -33,6 +33,9 @@ const filterProviderOption = document.getElementsByClassName('filter-provider-op
 
 // Obtener el boton de exportar
 const botonExportar = document.getElementsByClassName('export-button')[0]
+
+// Boton para seleccionar todas las facturas
+const botonSeleccionarTodasFacturas = document.getElementsByClassName('bills-select-all-button')[0]
 
 // Obtener el input de archivo XML
 const XMLFile = document.getElementsByClassName('xml_input_form')[0]
@@ -78,13 +81,19 @@ XMLFile.addEventListener('change', (event) => {
 // Evento para exportar la tabla fusionada al hacer click en el botón
 botonExportar.addEventListener('click', exportarTablaFusionada)
 
+// Evento para seleccionar todas las facturas
+botonSeleccionarTodasFacturas.addEventListener('click', () => {
+  if (FACTURAS.length === 0) return WarningToasty('Aún no hay facturas para seleccionar.')
+  // Seleccionar todas las tablas de facturas visibles
+  seleccionarTodasTablas()
+  // Notificar al usuario
+  SuccessToasty(`Se han seleccionado ${CHECKED_TABLES.length} factura(s) para exportar.`)
+})
+
 // Evento para filtrar por fecha
 filterDateOption.addEventListener('click', () => {
   // Crear el componente de filtro por fecha
-  const filterEmitionDateComponent = crearFilterEmitionDate((fecha) => {
-    filtrarPorFecha(fecha)
-  })
-
+  const filterEmitionDateComponent = crearFilterEmitionDate((fecha) => filtrarPorFecha(fecha))
   // Mostrar el componente en pantalla
   toolKitContainer.appendChild(filterEmitionDateComponent)
 })
@@ -92,23 +101,17 @@ filterDateOption.addEventListener('click', () => {
 // Evento para filtrar entre fechas
 filterBetweenDatesOption.addEventListener('click', () => {
   // Crear el componente de filtro entre fechas
-  const filterBetweenDatesComponent = crearFilterBetweenDates((fechaInicio, fechaFin) => {
-    filtrarPorRangoFechas(fechaInicio, fechaFin)
-  })
-
+  const filterBetweenDatesComponent = crearFilterBetweenDates((fechaInicio, fechaFin) => filtrarPorRangoFechas(fechaInicio, fechaFin))
   // Mostrar el componente en pantalla
   toolKitContainer.appendChild(filterBetweenDatesComponent)
 })
 
 // Evento para filtrar por receptor
 filterReceptorOption.addEventListener('click', () => {
+  // Obtener la lista de receptores únicos
   const receptores = getReceptores()
-
   // Crear el dropdown de receptores
-  const dropdownReceptores = crearCustomDropdown(receptores, (seleccionado) => {
-    filtrarPorReceptor(seleccionado)
-  })
-
+  const dropdownReceptores = crearCustomDropdown(receptores, (seleccionado) => filtrarPorReceptor(seleccionado))
   // Mostrar el dropdown en pantalla
   toolKitContainer.appendChild(dropdownReceptores)
 })
@@ -116,11 +119,8 @@ filterReceptorOption.addEventListener('click', () => {
 // Evento para filtrar por proveedor
 filterProviderOption.addEventListener('click', () => {
   const proveedores = getProveedores()
-
   // Crear el dropdown de proveedores
-  const dropdownProveedores = crearCustomDropdown(proveedores, (seleccionado) => {
-    filtrarPorProveedor(seleccionado)
-  })
+  const dropdownProveedores = crearCustomDropdown(proveedores, (seleccionado) => filtrarPorProveedor(seleccionado))
   // Mostrar el dropdown en pantalla
   toolKitContainer.appendChild(dropdownProveedores)
 })

@@ -200,6 +200,7 @@ function getTablaFusion () {
 function limpiarTablasSeleccionadas () {
   // Limpiar las tablas seleccionadas
   CHECKED_TABLES.length = 0
+
   // Desmarcar todos los checkboxes en la interfaz
   const checkboxes = document.querySelectorAll('input[type="checkbox"].btn-check')
   checkboxes.forEach(checkbox => {
@@ -207,4 +208,18 @@ function limpiarTablasSeleccionadas () {
   })
 }
 
-export { getTablaFactura, getTablaFusion, limpiarTablasSeleccionadas }
+// Funcion para seleccionar todas las tablas
+function seleccionarTodasTablas () {
+  // Limpiar las tablas seleccionadas
+  limpiarTablasSeleccionadas()
+  // Marcar todos los checkboxes en la interfaz y agregar a CHECKED_TABLES
+  const checkboxes = document.querySelectorAll('input[type="checkbox"].btn-check')
+  checkboxes.forEach(checkbox => {
+    checkbox.checked = true
+    const idFactura = checkbox.id.replace('check-', '')
+    const tabla = checkbox.parentElement.nextSibling // La tabla está después del contenedor de opciones
+    CHECKED_TABLES.push({ tabla, key: idFactura })
+  })
+}
+
+export { getTablaFactura, getTablaFusion, limpiarTablasSeleccionadas, seleccionarTodasTablas }
