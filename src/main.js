@@ -2,13 +2,12 @@
 import { XMLParser } from 'fast-xml-parser'
 import { getDataFactura } from './data/XMLDataExtraction.js'
 import { getTablaFactura, getTablaFusion } from './components/BillsTable.js'
-import { exportarReporteExcel } from './utils/ExportTable.js'
+import { exportarReporteExcel } from './Utils/ExportTable.js'
 import { getFilterBubble } from './components/FilterBubble.js'
 import { crearCustomDropdown } from './components/CustomDropDown.js'
 import { crearFilterBetweenDates } from './components/FilterBetweenDates.js'
 import { crearFilterEmitionDate } from './components/FilterEmitionDate.js'
-
-import { parseDate, isBetweenDates } from './utils/DateOperations.js'
+import { parseDate, isSameDate, isBetweenDates } from './utils/DateOperations.js'
 
 // Importar constantes
 import { FACTURAS, FILTROS, TIPOS_FILTROS, TIPOS_FILTER_BUBBLES } from './config/constants.js'
@@ -52,8 +51,10 @@ XMLFile.addEventListener('change', (event) => {
     const XMLContent = e.target.result
     const XMLParseado = xmlParser.parse(XMLContent)
 
+    // Nombre archivo
+    const nombreArchivoXML = file.name
     // Parsear la data del XML relacionada a la factura
-    const dataFactura = getDataFactura(XMLParseado)
+    const dataFactura = getDataFactura(XMLParseado, nombreArchivoXML)
     // Obtener el id de la factura
     const idFactura = getIdFactura()
     // Obtener la tabla de contenidos generada; con la data extraida del XML importado
@@ -141,6 +142,13 @@ function renderTablasFacturas (facturas = FACTURAS) {
   facturas.forEach((factura) => {
     billsContainer.appendChild(factura.tablaFactura)
   })
+
+  // Mostrar el header de la lista de facturas si hay facturas
+  if (facturas.length === 0) {
+    document.getElementsByClassName('header-list-bills')[0].classList.add('d-none')
+  } else {
+    document.getElementsByClassName('header-list-bills')[0].classList.remove('d-none')
+  }
 }
 
 // Funcion para descartar una factura por identificador
@@ -155,6 +163,9 @@ function descartarFiltro (idFiltro) {
   const indexFiltro = FILTROS.findIndex(filtro => filtro.idFiltro === idFiltro)
   FILTROS.splice(indexFiltro, 1)
   if (FILTROS.length === 0) {
+    // Ocultar el header de filter bubbles
+    document.getElementsByClassName('header-filter-list')[0].classList.add('d-none')
+    // Renderizar todas las facturas
     renderTablasFacturas()
     return
   }
@@ -164,6 +175,8 @@ function descartarFiltro (idFiltro) {
 
 function onFiltroAgregado () {
   const facturasFiltradas = getFacturasFiltradas()
+  // Mostrar el header de filter bubbles
+  document.getElementsByClassName('header-filter-list')[0].classList.remove('d-none')
   renderTablasFacturas(facturasFiltradas)
 }
 
@@ -251,7 +264,7 @@ function getFacturasFiltradas (filtros = FILTROS, facturas = FACTURAS) {
     switch (filtro.tipo) {
       case TIPOS_FILTROS.FECHA:
         facturas.forEach((factura) => {
-          if (parseDate(factura.dataFactura.FechaEmision) === parseDate(filtro.valor)) {
+          if (isSameDate(parseDate(factura.dataFactura.FechaEmision), filtro.valor)) {
             // Verificar si la factura ya está en la lista de facturas filtradas
             if (!facturasFiltradas.includes(factura)) {
               facturasFiltradas.push(factura)

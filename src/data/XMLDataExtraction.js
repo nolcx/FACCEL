@@ -1,6 +1,8 @@
 import { parseDate } from '../utils/DateOperations.js'
 
-function getDataFactura (DATA) {
+function getDataFactura (DATA, nombreArchivoXML = 'Archivo Desconocido') {
+  if (!DATA) return null
+
   const { FacturaElectronica } = DATA || {}
   const proveedor = FacturaElectronica?.Emisor?.NombreComercial || 'Proveedor Desconocido'
   const receptor = FacturaElectronica?.Receptor?.Nombre || 'Receptor Desconocido'
@@ -23,7 +25,7 @@ function getDataFactura (DATA) {
     return acc
   }, {})
 
-  const dataFacturas = { receptor, proveedor, fechaEmision, listaImpuestos }
+  const dataFacturas = { receptor, proveedor, fechaEmision, listaImpuestos, nombreArchivoXML }
   return dataFacturas
 }
 

@@ -2,11 +2,23 @@ const CHECKED_TABLES = []
 
 function getTablaFactura (idFactura, dataFacturas = null, descartarFactura) {
   if (!dataFacturas || dataFacturas.length === 0) return 'No hay facturas para mostrar.'
-  const { receptor, proveedor, fechaEmision, listaImpuestos } = dataFacturas
+  const { receptor, proveedor, fechaEmision, listaImpuestos, nombreArchivoXML } = dataFacturas
+  // H5 Nombre archivo de la factura
+  const h5nombreArchivo = document.createElement('h5')
+  h5nombreArchivo.innerHTML = `<strong>Nombre archivo: </strong>${nombreArchivoXML}`
+  h5nombreArchivo.classList.add('mb-2')
+
+  // Contenedor principal del componente factura
+  const contenedorFactura = document.createElement('div')
+  contenedorFactura.classList.add('factura-container', 'mb-3', 'd-flex', 'flex-wrap', 'flex-column', 'overflow-scroll', 'align-items-start', 'border', 'p-3', 'rounded')
+
+  // Contenedor de opciones de la factura
+  const contenedorOpciones = document.createElement('div')
+  contenedorOpciones.classList.add('factura-options', 'd-flex', 'flex-wrap', 'gap-2')
 
   // Generamos tabla de contenidos
   const tablaContenidos = document.createElement('table')
-  tablaContenidos.classList.add('table-contents', 'table', 'table-bordered', 'mt-4')
+  tablaContenidos.classList.add('table-contents', 'table', 'table-bordered', 'mt-1')
 
   // Encabezados de la tabla de contenidos
   const tHeader = document.createElement('thead')
@@ -71,16 +83,8 @@ function getTablaFactura (idFactura, dataFacturas = null, descartarFactura) {
   labelCheck.setAttribute('for', `check-${idFactura}`)
   labelCheck.textContent = 'Incluir en Reporte'
 
-  // Meter el checkbox dentro de un <th>
-  const thCheckBox = document.createElement('th')
-  thCheckBox.appendChild(checkTabla)
-  thCheckBox.appendChild(labelCheck)
-
   // Evento al seleccionar el checkbox
   checkTabla.addEventListener('change', (event) => { onCheckTable(event, { tabla: tablaContenidos, key: idFactura }) })
-
-  // Agregar el checkbox al dataRow
-  headerRow.appendChild(thCheckBox)
 
   // Crear boton para descartar la factura
   const btnDescartarFactura = document.createElement('input')
@@ -90,22 +94,31 @@ function getTablaFactura (idFactura, dataFacturas = null, descartarFactura) {
   btnDescartarFactura.value = 'Descartar Factura'
   btnDescartarFactura.autocomplete = 'off'
 
-  // Meter el boton dentro de un <th>
-  const thDiscardButton = document.createElement('th')
-  thDiscardButton.appendChild(btnDescartarFactura)
-
   // Evento para descartar la factura
   btnDescartarFactura.addEventListener('click', (event) => { onDescartarFactura(event, idFactura, descartarFactura) })
-
-  // Agregar el boton de descartar al dataRow
-  headerRow.appendChild(thDiscardButton)
 
   // Ensamblamos la tabla de contenidos
   tHeader.appendChild(headerRow)
   tablaContenidos.appendChild(tHeader)
   tablaContenidos.appendChild(tbody)
 
-  return tablaContenidos
+  // Agregamos el nombre del archivo al contenedor principal de la factura
+  contenedorFactura.appendChild(h5nombreArchivo)
+
+  // Agregar checkbox y label al contenedor de opciones
+  contenedorOpciones.appendChild(checkTabla)
+  contenedorOpciones.appendChild(labelCheck)
+
+  // Agregar boton descartar al contenedor de opciones
+  contenedorOpciones.appendChild(btnDescartarFactura)
+
+  // Agregar contenedor de opciones al contenedor principal de la factura
+  contenedorFactura.appendChild(contenedorOpciones)
+
+  // Ensamblamos el contenedor de la factura
+  contenedorFactura.appendChild(tablaContenidos)
+
+  return contenedorFactura
 }
 
 function onCheckTable (event, obTabla) {
@@ -120,7 +133,6 @@ function onCheckTable (event, obTabla) {
 }
 
 function onDescartarFactura (event, idFactura, descartarFactura) {
-  console.log('Descartando factura con id:', idFactura)
   event.preventDefault()
   descartarFactura(idFactura)
 }
