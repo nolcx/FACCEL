@@ -1,5 +1,5 @@
 /* global FileReader */
-import { XMLParser } from 'https://esm.run/fast-xml-parser'
+import { XMLParser } from 'https://esm.sh/fast-xml-parser@4.3.5'
 import { ErrorToasty, InfoToasty, SuccessToasty, WarningToasty } from './components/Toastifys.js'
 import { getDataFactura } from './data/BillsJSONDataExtraction.js'
 import { getTablaFactura, getTablaFusion, limpiarTablasSeleccionadas, seleccionarTodasTablas } from './components/BillsTable.js'
