@@ -1,5 +1,5 @@
-import Toastify from 'toastify-js'
-import 'toastify-js/src/toastify.css'
+// import Toastify from 'toastify-js'
+import Toastify from 'https://esm.run/toastify-js'
 
 function WarningToasty (detalle) {
   Toastify({

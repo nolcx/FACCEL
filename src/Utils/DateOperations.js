@@ -1,6 +1,6 @@
-import dayjs from 'dayjs'
-import isBetween from 'dayjs/plugin/isBetween'
-import customParseFormat from 'dayjs/plugin/customParseFormat'
+import dayjs from 'https://esm.run/dayjs'
+import isBetween from 'https://esm.run/dayjs/plugin/isBetween'
+import customParseFormat from 'https://esm.run/dayjs/plugin/customParseFormat'
 dayjs.extend(customParseFormat)
 dayjs.extend(isBetween)
 

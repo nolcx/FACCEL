@@ -1,4 +1,4 @@
-import * as XLSX from 'xlsx'
+import * as XLSX from 'https://esm.run/xlsx'
 
 function exportarReporteExcel (tablaFusionada) {
   // Lógica para exportar la tabla fusionada a Excel; usando xlsx
