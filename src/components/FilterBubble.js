@@ -1,4 +1,4 @@
-import { TIPOS_FILTER_BUBBLES } from '../config/constants'
+import { TIPOS_FILTER_BUBBLES } from '../config/constants.js'
 
 function getFilterBubble (type, value, descartarFiltro, idFiltro) {
   const bubble = document.createElement('div')
