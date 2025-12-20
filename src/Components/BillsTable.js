@@ -1,4 +1,5 @@
 import { CHECKED_TABLES } from '../config/constants.js'
+import { InfoToolTip } from './ToolTips.js'
 
 function getTablaFactura (idFactura, dataFacturas = null, descartarFactura) {
   if (!dataFacturas || dataFacturas.length === 0) return 'No hay facturas para mostrar.'
@@ -63,12 +64,34 @@ function getTablaFactura (idFactura, dataFacturas = null, descartarFactura) {
     th.textContent = `Ventas al ${tarifa}%`
     headerRow.appendChild(th)
 
+    // Icono de información sobre la tarifa
+    const infoIcon = InfoToolTip('Subtotal + Impuesto correspondiente a esta tarifa.')
+    th.appendChild(infoIcon)
+
     // Datos
     const tdDataTotals = document.createElement('td')
     tdDataTotals.textContent = info.totalTarifa
     dataRow.appendChild(tdDataTotals)
     tbody.appendChild(dataRow)
   })
+
+  // Total otros cargos, si aplica
+  if (dataFacturas.totalOtrosCargos) {
+    // Encabezado otros cargos
+    const thOtrosCargos = document.createElement('th')
+    thOtrosCargos.textContent = 'Total Otros Cargos'
+    headerRow.appendChild(thOtrosCargos)
+
+    // Datos otros cargos
+    const tdOtrosCargos = document.createElement('td')
+    tdOtrosCargos.textContent = dataFacturas.totalOtrosCargos
+    dataRow.appendChild(tdOtrosCargos)
+    tbody.appendChild(dataRow)
+
+    // Tooltip info otros cargos
+    const infoIconOtrosCargos = InfoToolTip('Total de otros cargos adicionales aplicados en la factura.')
+    thOtrosCargos.appendChild(infoIconOtrosCargos)
+  }
 
   // Crear checkbox para seleccion de tablas
   const checkTabla = document.createElement('input')
@@ -134,6 +157,12 @@ function onCheckTable (event, obTabla) {
 
 function onDescartarFactura (event, idFactura, descartarFactura) {
   event.preventDefault()
+
+  // Remover de checked tables si está seleccionado
+  const index = CHECKED_TABLES.findIndex(item => item.key === idFactura)
+  if (index > -1) CHECKED_TABLES.splice(index, 1)
+
+  // Llamar a la función callback para descartar la factura
   descartarFactura(idFactura)
 }
 

@@ -1,7 +1,7 @@
 /* global FileReader */
 import { XMLParser } from 'fast-xml-parser'
-import { InfoToasty, SuccessToasty, WarningToasty } from './components/Toastifys.js'
-import { getDataFactura } from './data/XMLDataExtraction.js'
+import { ErrorToasty, InfoToasty, SuccessToasty, WarningToasty } from './components/Toastifys.js'
+import { getDataFactura } from './data/BillsJSONDataExtraction.js'
 import { getTablaFactura, getTablaFusion, limpiarTablasSeleccionadas, seleccionarTodasTablas } from './components/BillsTable.js'
 import { exportarReporteExcel } from './Utils/ExportTable.js'
 import { getFilterBubble } from './components/FilterBubble.js'
@@ -37,6 +37,9 @@ const botonExportar = document.getElementsByClassName('export-button')[0]
 // Boton para seleccionar todas las facturas
 const botonSeleccionarTodasFacturas = document.getElementsByClassName('bills-select-all-button')[0]
 
+// Boton para limpiar las facturas selecciones
+const botonLimpiarSeleccionFacturas = document.getElementsByClassName('bills-clear-selection-button')[0]
+
 // Obtener el input de archivo XML
 const XMLFile = document.getElementsByClassName('xml_input_form')[0]
 
@@ -58,22 +61,35 @@ XMLFile.addEventListener('change', (event) => {
     // Nombre archivo
     const nombreArchivoXML = file.name
     // Parsear la data del XML relacionada a la factura
-    const dataFactura = getDataFactura(XMLParseado, nombreArchivoXML)
-    // Obtener el id de la factura
-    const idFactura = getIdFactura()
-    // Obtener la tabla de contenidos generada; con la data extraida del XML importado
-    const tablaFactura = getTablaFactura(idFactura, dataFactura, descartarFactura)
+    getDataFactura({ XMLParseado, nombreArchivoXML }).then((dataFactura) => {
+      if (!dataFactura) return WarningToasty(`No se pudo extraer la información de la factura del archivo ${nombreArchivoXML}.`)
 
-    // Guardar la factura en la lista de facturas
-    const factura = {
-      idFactura,
-      dataFactura: XMLParseado.FacturaElectronica,
-      tablaFactura
-    }
-    FACTURAS.push(factura)
+      // Obtener el id de la factura
+      const idFactura = getIdFactura()
+      // Obtener la tabla de contenidos generada; con la data extraida del XML importado
+      const tablaFactura = getTablaFactura(idFactura, dataFactura, descartarFactura)
 
-    // Renderizar las tablas de las facturas
-    renderTablasFacturas()
+      // Guardar la factura en la lista de facturas
+      const factura = {
+        idFactura,
+        dataFactura: XMLParseado.FacturaElectronica,
+        tablaFactura
+      }
+      FACTURAS.push(factura)
+
+      // Renderizar las tablas de las facturas
+      renderTablasFacturas()
+      return dataFactura
+    }).catch((error) => {
+      // Si el error contiene undefined, es probable que el XML esté mal formado
+      if (error.message.includes('undefined')) {
+        return ErrorToasty(
+          'Este archivo parece no contar con el formato XML válido.\n\n' +
+          '👉 POR FAVOR, verifique que no sea una FIRMA DE HACIENDA e intente nuevamente.'
+        )
+      }
+      ErrorToasty(`Hubo un error al extraer la información de la factura del archivo ${nombreArchivoXML}: ${error.message}`)
+    })
   }
   reader.readAsText(file)
 })
@@ -88,6 +104,15 @@ botonSeleccionarTodasFacturas.addEventListener('click', () => {
   seleccionarTodasTablas()
   // Notificar al usuario
   SuccessToasty(`Se han seleccionado ${CHECKED_TABLES.length} factura(s) para exportar.`)
+})
+
+// Evento para limpiar las facturas seleccionadas
+botonLimpiarSeleccionFacturas.addEventListener('click', () => {
+  if (CHECKED_TABLES.length === 0) return WarningToasty('Aún no hay facturas seleccionadas.')
+  // Limpiar las tablas seleccionadas
+  limpiarTablasSeleccionadas()
+  // Notificar al usuario
+  SuccessToasty('Se han limpiado las facturas seleccionadas.')
 })
 
 // Evento para filtrar por fecha

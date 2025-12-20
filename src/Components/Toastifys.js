@@ -46,4 +46,19 @@ function InfoToasty (detalle) {
   }).showToast()
 }
 
-export { WarningToasty, SuccessToasty, InfoToasty }
+function ErrorToasty (detalle) {
+  Toastify({
+    text: `❌ ${detalle}`,
+    duration: 4000,
+    close: true,
+    gravity: 'top',
+    position: 'right',
+    style: {
+      color: '#333333ff',
+      background: '#f8d7da',
+      borderRadius: '8px'
+    }
+  }).showToast()
+}
+
+export { WarningToasty, SuccessToasty, InfoToasty, ErrorToasty }
