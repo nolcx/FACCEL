@@ -50,14 +50,13 @@ const xmlParser = new XMLParser()
 XMLFile.addEventListener('change', (event) => {
   const file = event.target.files[0]
   if (!file) return
-  if (!file.name.endsWith('.xml')) return
-
+  // Validar que el archivo tenga extensión .xml
+  if (!file.name.endsWith('.xml')) return WarningToasty(`El archivo ${file.name} no es un archivo XML, verifique e intente nuevamente.`)
   // Crear un FileReader para leer el contenido del archivo
   const reader = new FileReader()
   reader.onload = function (e) {
     const XMLContent = e.target.result
     const XMLParseado = xmlParser.parse(XMLContent)
-
     // Nombre archivo
     const nombreArchivoXML = file.name
     // Parsear la data del XML relacionada a la factura
