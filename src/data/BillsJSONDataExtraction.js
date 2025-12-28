@@ -3,22 +3,27 @@ import { parseDate } from '../utils/DateOperations.js'
 function getDataFactura ({ XMLParseado, nombreArchivoXML = 'Archivo Desconocido' }) {
   return new Promise((resolve, reject) => {
     try {
-      if (!XMLParseado) return resolve(null)
+      console.log(XMLParseado)
+      if (!XMLParseado) reject(new Error('No se ha proporcionado un XML válido.'))
+      if (XMLParseado.MensajeHacienda) reject(new Error('El archivo proporcionado es una Respuesta de Hacienda, no una Factura Electrónica.'))
+      if (XMLParseado.TiqueteElectronico) reject(new Error('El archivo proporcionado es un Tiquete Electrónico, no una Factura Electrónica.'))
+      if (XMLParseado.NotaDebitoElectronica) reject(new Error('El archivo proporcionado es una Nota de Débito Electrónica, no una Factura Electrónica.'))
+      if (XMLParseado.NotaCreditoElectronica) reject(new Error('El archivo proporcionado es una Nota de Crédito Electrónica, no una Factura Electrónica.'))
+      if (!XMLParseado.FacturaElectronica) reject(new Error('El archivo proporcionado no es una Factura Electrónica válida.'))
 
-      const { FacturaElectronica } = XMLParseado || {}
-      const proveedor = FacturaElectronica?.Emisor?.NombreComercial || 'Proveedor Desconocido'
-      const receptor = FacturaElectronica?.Receptor?.Nombre || 'Receptor Desconocido'
+      const { FacturaElectronica } = XMLParseado
+      const proveedor = FacturaElectronica.Emisor?.NombreComercial || 'Proveedor Desconocido'
+      const receptor = FacturaElectronica.Receptor?.Nombre || 'Receptor Desconocido'
       const fechaEmision = parseDate(FacturaElectronica.FechaEmision) || 'Fecha Desconocida'
 
       // Obtener la lista de servicios
-      let listaServicios = FacturaElectronica?.DetalleServicio?.LineaDetalle
+      let listaServicios = FacturaElectronica.DetalleServicio?.LineaDetalle
 
       // Asegurarse de que listaServicios sea un array
       if (!Array.isArray(listaServicios)) {
         // Si es un solo objeto, convertirlo en un array (de un solo elemento, si existe)
         listaServicios = listaServicios ? [listaServicios] : []
       }
-
       // Clonar la lista de servicios para evitar mutaciones
       listaServicios = structuredClone(listaServicios)
 
@@ -41,7 +46,7 @@ function getDataFactura ({ XMLParseado, nombreArchivoXML = 'Archivo Desconocido'
       }, {})
 
       // Total de otros cargos
-      const TotalOtrosCargos = FacturaElectronica?.ResumenFactura?.TotalOtrosCargos || 0
+      const TotalOtrosCargos = FacturaElectronica.ResumenFactura?.TotalOtrosCargos || 0
 
       const dataFacturas = {
         receptor,

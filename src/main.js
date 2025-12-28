@@ -87,7 +87,7 @@ XMLFile.addEventListener('change', (event) => {
           '👉 POR FAVOR, verifique que no sea una FIRMA DE HACIENDA e intente nuevamente.'
         )
       }
-      ErrorToasty(`Hubo un error al extraer la información de la factura del archivo ${nombreArchivoXML}: ${error.message}`)
+      ErrorToasty(`Hubo un error al extraer la información del archivo: ${error.message}`)
     })
   }
   reader.readAsText(file)
