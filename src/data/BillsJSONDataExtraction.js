@@ -12,7 +12,7 @@ function getDataFactura ({ XMLParseado, nombreArchivoXML = 'Archivo Desconocido'
       if (!XMLParseado.FacturaElectronica) reject(new Error('El archivo proporcionado no es una Factura Electrónica válida.'))
 
       const { FacturaElectronica } = XMLParseado
-      const proveedor = FacturaElectronica.Emisor?.NombreComercial || 'Proveedor Desconocido'
+      const proveedor = FacturaElectronica.Emisor?.NombreComercial || FacturaElectronica.Emisor?.Nombre || 'Proveedor Desconocido'
       const receptor = FacturaElectronica.Receptor?.Nombre || 'Receptor Desconocido'
       const fechaEmision = parseDate(FacturaElectronica.FechaEmision) || 'Fecha Desconocida'
 
