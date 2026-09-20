@@ -81,7 +81,9 @@ function buildInvoiceTable (idFactura, dataFacturas, listaImpuestos) {
     const spanExonerado = document.createElement('span')
     spanExonerado.textContent = 'Exento'
     thExonerado.appendChild(spanExonerado)
-    thExonerado.appendChild(TooltipFactory.create('info', 'Ventas exoneradas de impuesto'))
+    thExonerado.appendChild(TooltipFactory.create(
+      'Compras exentas o exoneradas del impuesto. No generan IVA.'
+    ))
     headerRow.appendChild(thExonerado)
   }
 
@@ -90,7 +92,9 @@ function buildInvoiceTable (idFactura, dataFacturas, listaImpuestos) {
     const spanCompras = document.createElement('span')
     spanCompras.textContent = `Compras ${tarifa}%`
     thCompras.appendChild(spanCompras)
-    thCompras.appendChild(TooltipFactory.create('info', 'Compras sin impuesto'))
+    thCompras.appendChild(TooltipFactory.create(
+      `Monto bruto de las compras gravadas al ${tarifa}%, antes de restar el descuento y sin incluir el impuesto.`
+    ))
     headerRow.appendChild(thCompras)
   })
 
@@ -104,7 +108,9 @@ function buildInvoiceTable (idFactura, dataFacturas, listaImpuestos) {
     const spanDescuento = document.createElement('span')
     spanDescuento.textContent = 'Descuento'
     thDescuento.appendChild(spanDescuento)
-    thDescuento.appendChild(TooltipFactory.create('info', 'Descuentos aplicados sobre las compras'))
+    thDescuento.appendChild(TooltipFactory.create(
+      'Descuentos que el proveedor aplicó sobre las compras. Se resta del TOTAL.'
+    ))
     headerRow.appendChild(thDescuento)
   }
 
@@ -113,7 +119,9 @@ function buildInvoiceTable (idFactura, dataFacturas, listaImpuestos) {
     const spanOtrosCargos = document.createElement('span')
     spanOtrosCargos.textContent = 'Otros Cargos'
     thOtrosCargos.appendChild(spanOtrosCargos)
-    thOtrosCargos.appendChild(TooltipFactory.create('info', 'Cargos adicionales del documento'))
+    thOtrosCargos.appendChild(TooltipFactory.create(
+      'Cargos adicionales del comprobante, como el cargo 911 o Cruz Roja. Se suma al TOTAL.'
+    ))
     headerRow.appendChild(thOtrosCargos)
   }
 
@@ -122,7 +130,9 @@ function buildInvoiceTable (idFactura, dataFacturas, listaImpuestos) {
     const spanIVA = document.createElement('span')
     spanIVA.textContent = `IVA ${tarifa}%`
     thIVA.appendChild(spanIVA)
-    thIVA.appendChild(TooltipFactory.create('info', 'Monto de impuesto'))
+    thIVA.appendChild(TooltipFactory.create(
+      `Impuesto al valor agregado del ${tarifa}%, calculado sobre la base gravada ya descontada.`
+    ))
     headerRow.appendChild(thIVA)
   })
 
@@ -130,7 +140,9 @@ function buildInvoiceTable (idFactura, dataFacturas, listaImpuestos) {
   const spanTotalFinal = document.createElement('span')
   spanTotalFinal.textContent = 'TOTAL'
   thTotalFinal.appendChild(spanTotalFinal)
-  thTotalFinal.appendChild(TooltipFactory.create('info', 'Total de todas las compras e impuestos'))
+  thTotalFinal.appendChild(TooltipFactory.create(
+    'Compras menos Descuento, más Otros Cargos y el IVA. Equivale al total del comprobante.'
+  ))
   thTotalFinal.style.backgroundColor = '#f0fdf4'
   thTotalFinal.style.color = 'var(--primary-dark)'
   thTotalFinal.style.fontWeight = '700'

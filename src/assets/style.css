@@ -363,6 +363,7 @@ label.btn {
 }
 
 .tooltip-icon {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -371,15 +372,78 @@ label.btn {
   border-radius: 50%;
   background-color: var(--primary-color);
   color: white;
-  font-size: 11px;
-  font-weight: bold;
   margin-left: var(--spacing-sm);
   cursor: help;
   transition: var(--transition);
 }
 
-.tooltip-icon:hover {
+.tooltip-icon:hover,
+.tooltip-icon:focus-visible {
   background-color: var(--primary-dark);
+}
+
+/* Tarjeta del tooltip. El texto viene de data-tooltip. */
+.tooltip-icon::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  width: max-content;
+  max-width: 260px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background-color: #1f2937;
+  color: #f9fafb;
+  box-shadow: 0 8px 20px rgb(0 0 0 / 22%);
+  /* El th impone uppercase, nowrap y letter-spacing: hay que revertirlos. */
+  text-transform: none;
+  white-space: normal;
+  letter-spacing: normal;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+/* Flecha que apunta al icono. */
+.tooltip-icon::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 50%;
+  border: 6px solid transparent;
+  border-top-color: #1f2937;
+}
+
+.tooltip-icon::after,
+.tooltip-icon::before {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(4px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 50;
+}
+
+.tooltip-icon:hover::after,
+.tooltip-icon:hover::before,
+.tooltip-icon:focus-visible::after,
+.tooltip-icon:focus-visible::before {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* En la última columna la tarjeta se alinea a la derecha para no salirse. */
+.table-contents th:last-child .tooltip-icon::after {
+  left: auto;
+  right: -8px;
+  transform: translateX(0) translateY(4px);
+}
+
+.table-contents th:last-child .tooltip-icon:hover::after,
+.table-contents th:last-child .tooltip-icon:focus-visible::after {
+  transform: translateX(0) translateY(0);
 }
 
 .form-control {

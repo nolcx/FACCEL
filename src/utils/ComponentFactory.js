@@ -1,3 +1,5 @@
+import { Icons } from './Icons.js'
+
 class ButtonFactory {
   static create (label, variant = 'primary', size = 'md', onClick = null, icon = null) {
     const button = document.createElement('button')
@@ -185,20 +187,18 @@ class BadgeFactory {
 }
 
 class TooltipFactory {
-  static create (text, content) {
-    const wrapper = document.createElement('span')
-    wrapper.style.display = 'inline-flex'
-    wrapper.style.alignItems = 'center'
-    wrapper.style.gap = 'var(--spacing-sm)'
-
+  static create (content) {
     const icon = document.createElement('span')
     icon.className = 'tooltip-icon'
-    icon.title = content
-    icon.textContent = 'i'
+    // SVG en vez de la letra "i": un glifo de texto se apoya en la linea base
+    // y no queda centrado dentro del circulo.
+    icon.innerHTML = Icons.infoGlyph
+    // El mensaje se pinta con ::after desde data-tooltip. Sin `title`, para no
+    // encimar el tooltip nativo del navegador sobre el propio.
+    icon.dataset.tooltip = content
     icon.setAttribute('aria-label', content)
-
-    wrapper.appendChild(icon)
-    return wrapper
+    icon.tabIndex = 0
+    return icon
   }
 }
 
