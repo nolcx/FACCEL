@@ -36,10 +36,17 @@ function getDataFactura ({ XMLParseado, nombreArchivoXML = 'Archivo Desconocido'
         const impuesto = detalle?.Impuesto?.Tarifa || 0
 
         // Verificar si ya existe la tarifa de impuesto en el acumulador
-        if (!acc[impuesto]) acc[impuesto] = { servicios: [], subtotalTarifa: 0, impuestoTarifa: 0, totalTarifa: 0 }
+        if (!acc[impuesto]) acc[impuesto] = { servicios: [], subtotalTarifa: 0, descuentoTarifa: 0, impuestoTarifa: 0, totalTarifa: 0 }
 
-        // Sumar subtotal (sin impuesto)
-        const SumaSubtotal = parseFloat(acc[impuesto].subtotalTarifa) + (detalle?.SubTotal || 0)
+        // El SubTotal del XML ya viene con el descuento restado, asi que el
+        // bruto se reconstruye sumandolo de vuelta.
+        const descuento = getMontoDescuento(detalle)
+
+        // Sumar compras brutas (sin impuesto y antes del descuento)
+        const SumaSubtotal = parseFloat(acc[impuesto].subtotalTarifa) + (detalle?.SubTotal || 0) + descuento
+
+        // Sumar descuentos
+        const SumaDescuento = parseFloat(acc[impuesto].descuentoTarifa) + descuento
 
         // Sumar impuesto
         const SumaImpuesto = parseFloat(acc[impuesto].impuestoTarifa) + (detalle?.Impuesto?.Monto || 0)
@@ -49,6 +56,7 @@ function getDataFactura ({ XMLParseado, nombreArchivoXML = 'Archivo Desconocido'
 
         acc[impuesto].servicios.push(detalle)
         acc[impuesto].subtotalTarifa = SumaSubtotal
+        acc[impuesto].descuentoTarifa = SumaDescuento
         acc[impuesto].impuestoTarifa = SumaImpuesto
         acc[impuesto].totalTarifa = SumaTarifaTotal
 
@@ -56,7 +64,7 @@ function getDataFactura ({ XMLParseado, nombreArchivoXML = 'Archivo Desconocido'
       }, {})
 
       // Total de otros cargos
-      const TotalOtrosCargos = documento.ResumenFactura?.TotalOtrosCargos || 0
+      let TotalOtrosCargos = getMontoOtrosCargos(documento)
 
       // Total exonerado
       let TotalExonerado = documento.ResumenFactura?.TotalExonerado || 0
@@ -68,9 +76,11 @@ function getDataFactura ({ XMLParseado, nombreArchivoXML = 'Archivo Desconocido'
       if (esNotaCredito) {
         Subtotal = -Subtotal
         TotalExonerado = -TotalExonerado
+        TotalOtrosCargos = -TotalOtrosCargos
         // Invertir los signos en listaImpuestos
         Object.keys(listaImpuestos).forEach(tarifa => {
           listaImpuestos[tarifa].subtotalTarifa = -listaImpuestos[tarifa].subtotalTarifa
+          listaImpuestos[tarifa].descuentoTarifa = -listaImpuestos[tarifa].descuentoTarifa
           listaImpuestos[tarifa].impuestoTarifa = -listaImpuestos[tarifa].impuestoTarifa
           listaImpuestos[tarifa].totalTarifa = -listaImpuestos[tarifa].totalTarifa
         })
@@ -85,7 +95,7 @@ function getDataFactura ({ XMLParseado, nombreArchivoXML = 'Archivo Desconocido'
         listaImpuestos,
         subtotal: Subtotal,
         totalExonerado: TotalExonerado,
-        totalOtrosCargos: TotalOtrosCargos > 0 ? -TotalOtrosCargos : null,
+        totalOtrosCargos: TotalOtrosCargos,
         nombreArchivoXML
       }
 
@@ -94,6 +104,22 @@ function getDataFactura ({ XMLParseado, nombreArchivoXML = 'Archivo Desconocido'
       reject(error)
     }
   })
+}
+
+// Una linea puede traer un descuento, varios, o ninguno.
+function getMontoDescuento (detalle) {
+  const descuentos = detalle?.Descuento
+  if (!descuentos) return 0
+  const lista = Array.isArray(descuentos) ? descuentos : [descuentos]
+  return lista.reduce((suma, descuento) => suma + (descuento?.MontoDescuento || 0), 0)
+}
+
+// El documento puede traer un OtrosCargos, varios, o ninguno.
+function getMontoOtrosCargos (documento) {
+  const cargos = documento?.OtrosCargos
+  if (!cargos) return 0
+  const lista = Array.isArray(cargos) ? cargos : [cargos]
+  return lista.reduce((suma, cargo) => suma + (cargo?.MontoCargo || 0), 0)
 }
 
 export { getDataFactura }

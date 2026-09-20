@@ -56,7 +56,7 @@ function getTablaFactura (idFactura, dataFacturas = null, descartarFactura) {
 }
 
 function buildInvoiceTable (idFactura, dataFacturas, listaImpuestos) {
-  const { proveedor, fechaEmision, numeroConsecutivo } = dataFacturas
+  const { proveedor, fechaEmision, numeroConsecutivo, totalOtrosCargos } = dataFacturas
   const table = document.createElement('table')
   table.className = 'table-contents mt-1'
 
@@ -72,26 +72,9 @@ function buildInvoiceTable (idFactura, dataFacturas, listaImpuestos) {
 
   const tarifas = Object.keys(listaImpuestos)
     .sort((a, b) => parseFloat(a) - parseFloat(b))
+    .filter(tarifa => tarifa !== '0')
 
-  const tieneExencion = tarifas.includes('0')
-
-  tarifas.forEach(tarifa => {
-    if (tarifa === '0') return
-
-    const thCompras = document.createElement('th')
-    const spanCompras = document.createElement('span')
-    spanCompras.textContent = `Compras ${tarifa}%`
-    thCompras.appendChild(spanCompras)
-    thCompras.appendChild(TooltipFactory.create('info', 'Compras sin impuesto'))
-    headerRow.appendChild(thCompras)
-
-    const thIVA = document.createElement('th')
-    const spanIVA = document.createElement('span')
-    spanIVA.textContent = `IVA ${tarifa}%`
-    thIVA.appendChild(spanIVA)
-    thIVA.appendChild(TooltipFactory.create('info', 'Monto de impuesto'))
-    headerRow.appendChild(thIVA)
-  })
+  const tieneExencion = '0' in listaImpuestos
 
   if (tieneExencion) {
     const thExonerado = document.createElement('th')
@@ -101,6 +84,47 @@ function buildInvoiceTable (idFactura, dataFacturas, listaImpuestos) {
     thExonerado.appendChild(TooltipFactory.create('info', 'Ventas exoneradas de impuesto'))
     headerRow.appendChild(thExonerado)
   }
+
+  tarifas.forEach(tarifa => {
+    const thCompras = document.createElement('th')
+    const spanCompras = document.createElement('span')
+    spanCompras.textContent = `Compras ${tarifa}%`
+    thCompras.appendChild(spanCompras)
+    thCompras.appendChild(TooltipFactory.create('info', 'Compras sin impuesto'))
+    headerRow.appendChild(thCompras)
+  })
+
+  const totalDescuento = Object.values(listaImpuestos)
+    .reduce((suma, tarifa) => suma + tarifa.descuentoTarifa, 0)
+  const tieneDescuento = totalDescuento !== 0
+  const tieneOtrosCargos = totalOtrosCargos !== 0
+
+  if (tieneDescuento) {
+    const thDescuento = document.createElement('th')
+    const spanDescuento = document.createElement('span')
+    spanDescuento.textContent = 'Descuento'
+    thDescuento.appendChild(spanDescuento)
+    thDescuento.appendChild(TooltipFactory.create('info', 'Descuentos aplicados sobre las compras'))
+    headerRow.appendChild(thDescuento)
+  }
+
+  if (tieneOtrosCargos) {
+    const thOtrosCargos = document.createElement('th')
+    const spanOtrosCargos = document.createElement('span')
+    spanOtrosCargos.textContent = 'Otros Cargos'
+    thOtrosCargos.appendChild(spanOtrosCargos)
+    thOtrosCargos.appendChild(TooltipFactory.create('info', 'Cargos adicionales del documento'))
+    headerRow.appendChild(thOtrosCargos)
+  }
+
+  tarifas.forEach(tarifa => {
+    const thIVA = document.createElement('th')
+    const spanIVA = document.createElement('span')
+    spanIVA.textContent = `IVA ${tarifa}%`
+    thIVA.appendChild(spanIVA)
+    thIVA.appendChild(TooltipFactory.create('info', 'Monto de impuesto'))
+    headerRow.appendChild(thIVA)
+  })
 
   const thTotalFinal = document.createElement('th')
   const spanTotalFinal = document.createElement('span')
@@ -132,23 +156,6 @@ function buildInvoiceTable (idFactura, dataFacturas, listaImpuestos) {
 
   let totalGeneral = 0
 
-  tarifas.forEach(tarifa => {
-    if (tarifa === '0') return
-
-    const tdCompras = document.createElement('td')
-    tdCompras.textContent = listaImpuestos[tarifa].subtotalTarifa.toFixed(2)
-    tdCompras.style.fontWeight = '600'
-    dataRow.appendChild(tdCompras)
-
-    const tdIVA = document.createElement('td')
-    tdIVA.textContent = listaImpuestos[tarifa].impuestoTarifa.toFixed(2)
-    tdIVA.style.fontWeight = '600'
-    tdIVA.style.color = '#d97706'
-    dataRow.appendChild(tdIVA)
-
-    totalGeneral += listaImpuestos[tarifa].totalTarifa
-  })
-
   if (tieneExencion) {
     const tdExonerado = document.createElement('td')
     tdExonerado.textContent = listaImpuestos['0'].subtotalTarifa.toFixed(2)
@@ -156,6 +163,39 @@ function buildInvoiceTable (idFactura, dataFacturas, listaImpuestos) {
     dataRow.appendChild(tdExonerado)
     totalGeneral += listaImpuestos['0'].totalTarifa
   }
+
+  tarifas.forEach(tarifa => {
+    const tdCompras = document.createElement('td')
+    tdCompras.textContent = listaImpuestos[tarifa].subtotalTarifa.toFixed(2)
+    tdCompras.style.fontWeight = '600'
+    dataRow.appendChild(tdCompras)
+
+    totalGeneral += listaImpuestos[tarifa].totalTarifa
+  })
+
+  if (tieneDescuento) {
+    const tdDescuento = document.createElement('td')
+    tdDescuento.textContent = totalDescuento.toFixed(2)
+    tdDescuento.style.fontWeight = '600'
+    tdDescuento.style.color = '#dc2626'
+    dataRow.appendChild(tdDescuento)
+  }
+
+  if (tieneOtrosCargos) {
+    const tdOtrosCargos = document.createElement('td')
+    tdOtrosCargos.textContent = totalOtrosCargos.toFixed(2)
+    tdOtrosCargos.style.fontWeight = '600'
+    dataRow.appendChild(tdOtrosCargos)
+    totalGeneral += totalOtrosCargos
+  }
+
+  tarifas.forEach(tarifa => {
+    const tdIVA = document.createElement('td')
+    tdIVA.textContent = listaImpuestos[tarifa].impuestoTarifa.toFixed(2)
+    tdIVA.style.fontWeight = '600'
+    tdIVA.style.color = '#d97706'
+    dataRow.appendChild(tdIVA)
+  })
 
   const tdTotalFinal = document.createElement('td')
   tdTotalFinal.textContent = totalGeneral.toFixed(2)
