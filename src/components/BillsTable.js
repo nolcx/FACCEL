@@ -56,14 +56,14 @@ function getTablaFactura (idFactura, dataFacturas = null, descartarFactura) {
 }
 
 function buildInvoiceTable (idFactura, dataFacturas, listaImpuestos) {
-  const { receptor, proveedor, fechaEmision, totalOtrosCargos, totalExonerado } = dataFacturas
+  const { proveedor, fechaEmision, numeroConsecutivo } = dataFacturas
   const table = document.createElement('table')
   table.className = 'table-contents mt-1'
 
   const thead = table.createTHead()
   const headerRow = document.createElement('tr')
 
-  const headers = ['Proveedor', 'Receptor', 'Fecha de Emisión']
+  const headers = ['Fecha de Emisión', 'Consecutivo', 'Proveedor']
   headers.forEach(header => {
     const th = document.createElement('th')
     th.textContent = header
@@ -117,17 +117,18 @@ function buildInvoiceTable (idFactura, dataFacturas, listaImpuestos) {
   const tbody = table.createTBody()
   const dataRow = document.createElement('tr')
 
-  const tdProveedor = document.createElement('td')
-  tdProveedor.textContent = proveedor
-  dataRow.appendChild(tdProveedor)
-
-  const tdReceptor = document.createElement('td')
-  tdReceptor.textContent = receptor
-  dataRow.appendChild(tdReceptor)
-
   const tdFecha = document.createElement('td')
   tdFecha.textContent = fechaEmision
   dataRow.appendChild(tdFecha)
+
+  const tdConsecutivo = document.createElement('td')
+  tdConsecutivo.textContent = numeroConsecutivo
+  tdConsecutivo.style.fontWeight = '600'
+  dataRow.appendChild(tdConsecutivo)
+
+  const tdProveedor = document.createElement('td')
+  tdProveedor.textContent = proveedor
+  dataRow.appendChild(tdProveedor)
 
   let totalGeneral = 0
 
@@ -294,7 +295,7 @@ function seleccionarTodasTablas () {
   checkboxes.forEach(checkbox => {
     checkbox.checked = true
     const idFactura = checkbox.id.replace('check-', '')
-    const tabla = checkbox.parentElement.nextSibling // La tabla está después del contenedor de opciones
+    const tabla = checkbox.closest('.factura-container').querySelector('table')
     CHECKED_TABLES.push({ tabla, key: idFactura })
   })
 }

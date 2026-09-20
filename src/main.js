@@ -75,7 +75,7 @@ XMLFile.addEventListener('change', (event) => {
       // Guardar la factura en la lista de facturas
       const factura = {
         idFactura,
-        dataFactura: XMLParseado.FacturaElectronica,
+        dataFactura: XMLParseado.FacturaElectronica || XMLParseado.NotaCreditoElectronica,
         tablaFactura
       }
       FACTURAS.push(factura)
@@ -377,9 +377,12 @@ function exportarTablaFusionada (e) {
   e.preventDefault()
   // Validar si el componente es null (es decir, no hay tablas seleccionadas)
   if (!getTablaFusion()) return WarningToasty('No hay facturas seleccionadas para exportar.')
-  // Obtener la tabla fusionada
-  const tablaFusionada = getTablaFusion()
-  // Exportar la tabla fusionada a Excel
-  exportarReporteExcel(tablaFusionada)
+  // Obtener datos de facturas seleccionadas para exportación
+  const facturasSeleccionadas = CHECKED_TABLES.map(({ key }) => {
+    const factura = FACTURAS.find(f => f.idFactura === key)
+    return factura ? factura.dataFactura : null
+  }).filter(Boolean)
+  // Exportar la tabla fusionada a Excel pasando CHECKED_TABLES y datos de facturas
+  exportarReporteExcel(CHECKED_TABLES, facturasSeleccionadas)
   return SuccessToasty('Reporte exportado exitosamente.')
 }

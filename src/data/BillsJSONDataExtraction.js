@@ -17,6 +17,7 @@ function getDataFactura ({ XMLParseado, nombreArchivoXML = 'Archivo Desconocido'
       const proveedor = documento.Emisor?.NombreComercial || documento.Emisor?.Nombre || 'Proveedor Desconocido'
       const receptor = documento.Receptor?.Nombre || 'Receptor Desconocido'
       const fechaEmision = parseDate(documento.FechaEmision) || 'Fecha Desconocida'
+      const numeroConsecutivo = documento.NumeroConsecutivo || 'N/A'
 
       // Obtener la lista de servicios
       let listaServicios = documento.DetalleServicio?.LineaDetalle
@@ -80,6 +81,7 @@ function getDataFactura ({ XMLParseado, nombreArchivoXML = 'Archivo Desconocido'
         receptor,
         proveedor,
         fechaEmision,
+        numeroConsecutivo,
         listaImpuestos,
         subtotal: Subtotal,
         totalExonerado: TotalExonerado,
