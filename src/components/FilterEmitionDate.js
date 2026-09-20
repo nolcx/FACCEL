@@ -1,46 +1,53 @@
+import { ButtonFactory, InputFactory, ContainerFactory } from '../utils/ComponentFactory.js'
+
 function crearFilterEmitionDate (callback) {
-  const contenedorFilter = document.createElement('div')
-  contenedorFilter.classList.add('filter-emition-date', 'd-flex', 'flex-column', 'gap-2', 'mt-2', 'mb-2', 'w-25')
+  const container = ContainerFactory.createFlex('column', 'md', 'filter-emition-date')
+  container.style.maxWidth = '300px'
+  container.style.padding = 'var(--spacing-lg)'
+  container.style.backgroundColor = 'var(--secondary-light)'
+  container.style.borderRadius = 'var(--radius-md)'
+  container.style.border = '1px solid var(--border-color)'
 
-  // Bold
-  const boldFechaEmision = document.createElement('b')
-  boldFechaEmision.textContent = 'Fecha Emisión:'
+  const label = document.createElement('label')
+  label.textContent = 'Seleccionar Fecha de Emisión'
+  label.style.marginBottom = 'var(--spacing-md)'
 
-  // Input fecha emisión
-  const inputFechaEmision = document.createElement('input')
-  inputFechaEmision.type = 'date'
-  inputFechaEmision.classList.add('form-control', 'emition-date-input')
-  inputFechaEmision.setAttribute('placeholder', 'Fecha emisión')
+  const dateInput = InputFactory.createDateInput('emition-date-input')
 
-  // Boton aplicar filtro
-  const btnAplicarFiltro = document.createElement('button')
-  btnAplicarFiltro.classList.add('btn', 'btn-primary', 'btn-apply-emition-date-filter')
-  btnAplicarFiltro.textContent = 'Aplicar Filtro'
-  // Evento al hacer click en el boton de aplicar
-  btnAplicarFiltro.addEventListener('click', () => {
-    const fechaEmision = inputFechaEmision.value
-    contenedorFilter.remove()
-    // Llamar al callback con la fecha seleccionada
-    callback(fechaEmision)
-  })
+  const buttonContainer = document.createElement('div')
+  buttonContainer.className = 'd-flex gap-2'
 
-  // Boton descartar filtro
-  const btnDescartarFiltro = document.createElement('button')
-  btnDescartarFiltro.classList.add('btn', 'btn-secondary', 'btn-discard-emition-date-filter')
-  btnDescartarFiltro.textContent = 'Descartar Filtro'
+  const btnApply = ButtonFactory.create(
+    'Aplicar',
+    'primary',
+    'md',
+    () => {
+      const fecha = dateInput.value
+      container.remove()
+      callback(fecha)
+    },
+    'checkCircle'
+  )
 
-  // Evento al hacer click en el boton de descartar
-  btnDescartarFiltro.addEventListener('click', () => {
-    contenedorFilter.remove()
-    callback() // Indicar que se descarta el filtro
-  })
+  const btnDiscard = ButtonFactory.create(
+    'Cancelar',
+    'secondary',
+    'md',
+    () => {
+      container.remove()
+      callback()
+    },
+    'x'
+  )
 
-  // Ensamblar el contenedor
-  contenedorFilter.appendChild(boldFechaEmision)
-  contenedorFilter.appendChild(inputFechaEmision)
-  contenedorFilter.appendChild(btnAplicarFiltro)
-  contenedorFilter.appendChild(btnDescartarFiltro)
-  return contenedorFilter
+  buttonContainer.appendChild(btnApply)
+  buttonContainer.appendChild(btnDiscard)
+
+  container.appendChild(label)
+  container.appendChild(dateInput)
+  container.appendChild(buttonContainer)
+
+  return container
 }
 
 export { crearFilterEmitionDate }

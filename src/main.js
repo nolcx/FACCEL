@@ -9,9 +9,13 @@ import { crearCustomDropdown } from './components/CustomDropDown.js'
 import { crearFilterBetweenDates } from './components/FilterBetweenDates.js'
 import { crearFilterEmitionDate } from './components/FilterEmitionDate.js'
 import { parseDate, isSameDate, isBetweenDates } from './utils/DateOperations.js'
+import { renderIconsInElements } from './utils/IconRenderer.js'
 
 // Importar constantes
 import { FACTURAS, CHECKED_TABLES, FILTROS, TIPOS_FILTROS, TIPOS_FILTER_BUBBLES } from './config/constants.js'
+
+// Renderizar iconos en los elementos cuando carga la página
+document.addEventListener('DOMContentLoaded', renderIconsInElements)
 
 // Contador global de facturas
 let contadorGlobal = 0
@@ -59,9 +63,9 @@ XMLFile.addEventListener('change', (event) => {
     const XMLParseado = xmlParser.parse(XMLContent)
     // Nombre archivo
     const nombreArchivoXML = file.name
-    // Parsear la data del XML relacionada a la factura
+    // Parsear la data del XML relacionada a la factura o nota de crédito
     getDataFactura({ XMLParseado, nombreArchivoXML }).then((dataFactura) => {
-      if (!dataFactura) return WarningToasty(`No se pudo extraer la información de la factura del archivo ${nombreArchivoXML}.`)
+      if (!dataFactura) return WarningToasty(`No se pudo extraer la información del archivo ${nombreArchivoXML}.`)
 
       // Obtener el id de la factura
       const idFactura = getIdFactura()

@@ -1,147 +1,195 @@
 import { CHECKED_TABLES } from '../config/constants.js'
-import { InfoToolTip } from './ToolTips.js'
+import { CardFactory, CheckboxFactory, ButtonFactory, TooltipFactory } from '../utils/ComponentFactory.js'
 
 function getTablaFactura (idFactura, dataFacturas = null, descartarFactura) {
   if (!dataFacturas || dataFacturas.length === 0) return 'No hay facturas para mostrar.'
-  const { receptor, proveedor, fechaEmision, listaImpuestos, nombreArchivoXML } = dataFacturas
-  // H5 Nombre archivo de la factura
-  const h5nombreArchivo = document.createElement('h5')
-  h5nombreArchivo.innerHTML = `<strong>Nombre archivo: </strong>${nombreArchivoXML}`
-  h5nombreArchivo.classList.add('mb-2')
+  const { tipo, listaImpuestos, nombreArchivoXML } = dataFacturas
 
-  // Contenedor principal del componente factura
-  const contenedorFactura = document.createElement('div')
-  contenedorFactura.classList.add('factura-container', 'mb-3', 'd-flex', 'flex-wrap', 'flex-column', 'overflow-scroll', 'align-items-start', 'border', 'p-3', 'rounded')
+  // Crear contenedor con nombre de archivo
+  const headerContainer = document.createElement('div')
+  headerContainer.style.display = 'flex'
+  headerContainer.style.alignItems = 'center'
+  headerContainer.style.justifyContent = 'space-between'
+  headerContainer.style.marginBottom = 'var(--spacing-md)'
 
-  // Contenedor de opciones de la factura
-  const contenedorOpciones = document.createElement('div')
-  contenedorOpciones.classList.add('factura-options', 'd-flex', 'flex-wrap', 'gap-2')
+  const fileNameEl = document.createElement('span')
+  fileNameEl.textContent = nombreArchivoXML
+  fileNameEl.style.fontWeight = '600'
+  fileNameEl.style.color = 'var(--text-primary)'
+  headerContainer.appendChild(fileNameEl)
 
-  // Generamos tabla de contenidos
-  const tablaContenidos = document.createElement('table')
-  tablaContenidos.classList.add('table-contents', 'table', 'table-bordered', 'mt-1')
+  // Agregar badge según tipo de documento
+  const badge = document.createElement('span')
+  badge.style.display = 'inline-flex'
+  badge.style.alignItems = 'center'
+  badge.style.padding = '4px 12px'
+  badge.style.borderRadius = '16px'
+  badge.style.fontSize = '12px'
+  badge.style.fontWeight = '600'
+  badge.style.letterSpacing = '0.3px'
+  badge.style.whiteSpace = 'nowrap'
 
-  // Encabezados de la tabla de contenidos
-  const tHeader = document.createElement('thead')
+  if (tipo === 'NotaCredito') {
+    badge.textContent = 'Nota de Crédito'
+    badge.style.backgroundColor = '#ccfbf1'
+    badge.style.color = '#0d9488'
+    badge.style.border = '1px solid #99f6e4'
+  } else {
+    badge.textContent = 'Factura Electrónica'
+    badge.style.backgroundColor = '#fef3c7'
+    badge.style.color = '#b45309'
+    badge.style.border = '1px solid #fde047'
+  }
+
+  headerContainer.appendChild(badge)
+
+  const card = CardFactory.create(null)
+  card.appendChild(headerContainer)
+
+  const tablaContenidos = buildInvoiceTable(idFactura, dataFacturas, listaImpuestos)
+  const optionsContainer = buildInvoiceOptions(idFactura, tablaContenidos, descartarFactura)
+
+  card.appendChild(optionsContainer)
+  card.appendChild(tablaContenidos)
+
+  return card
+}
+
+function buildInvoiceTable (idFactura, dataFacturas, listaImpuestos) {
+  const { receptor, proveedor, fechaEmision, totalOtrosCargos, totalExonerado } = dataFacturas
+  const table = document.createElement('table')
+  table.className = 'table-contents mt-1'
+
+  const thead = table.createTHead()
   const headerRow = document.createElement('tr')
 
-  const thProveedor = document.createElement('th')
-  thProveedor.textContent = 'NOMBRE PROVEEDOR'
-  headerRow.appendChild(thProveedor)
+  const headers = ['Proveedor', 'Receptor', 'Fecha de Emisión']
+  headers.forEach(header => {
+    const th = document.createElement('th')
+    th.textContent = header
+    headerRow.appendChild(th)
+  })
 
-  const thReceptor = document.createElement('th')
-  thReceptor.textContent = 'NOMBRE RECEPTOR'
-  headerRow.appendChild(thReceptor)
+  const tarifas = Object.keys(listaImpuestos)
+    .sort((a, b) => parseFloat(a) - parseFloat(b))
 
-  const thFechaEmision = document.createElement('th')
-  thFechaEmision.textContent = 'FECHA EMISIÓN'
-  headerRow.appendChild(thFechaEmision)
+  const tieneExencion = tarifas.includes('0')
 
-  // Cuerpo de tabla de contenidos
-  const tbody = document.createElement('tbody')
+  tarifas.forEach(tarifa => {
+    if (tarifa === '0') return
 
-  // Mapeamos las filas y encabezados de la tabla de contenidos
+    const thCompras = document.createElement('th')
+    const spanCompras = document.createElement('span')
+    spanCompras.textContent = `Compras ${tarifa}%`
+    thCompras.appendChild(spanCompras)
+    thCompras.appendChild(TooltipFactory.create('info', 'Compras sin impuesto'))
+    headerRow.appendChild(thCompras)
+
+    const thIVA = document.createElement('th')
+    const spanIVA = document.createElement('span')
+    spanIVA.textContent = `IVA ${tarifa}%`
+    thIVA.appendChild(spanIVA)
+    thIVA.appendChild(TooltipFactory.create('info', 'Monto de impuesto'))
+    headerRow.appendChild(thIVA)
+  })
+
+  if (tieneExencion) {
+    const thExonerado = document.createElement('th')
+    const spanExonerado = document.createElement('span')
+    spanExonerado.textContent = 'Exento'
+    thExonerado.appendChild(spanExonerado)
+    thExonerado.appendChild(TooltipFactory.create('info', 'Ventas exoneradas de impuesto'))
+    headerRow.appendChild(thExonerado)
+  }
+
+  const thTotalFinal = document.createElement('th')
+  const spanTotalFinal = document.createElement('span')
+  spanTotalFinal.textContent = 'TOTAL'
+  thTotalFinal.appendChild(spanTotalFinal)
+  thTotalFinal.appendChild(TooltipFactory.create('info', 'Total de todas las compras e impuestos'))
+  thTotalFinal.style.backgroundColor = '#f0fdf4'
+  thTotalFinal.style.color = 'var(--primary-dark)'
+  thTotalFinal.style.fontWeight = '700'
+  headerRow.appendChild(thTotalFinal)
+
+  thead.appendChild(headerRow)
+
+  const tbody = table.createTBody()
   const dataRow = document.createElement('tr')
 
-  // Nombre del proveedor
   const tdProveedor = document.createElement('td')
   tdProveedor.textContent = proveedor
   dataRow.appendChild(tdProveedor)
 
-  // Nombre del receptor
   const tdReceptor = document.createElement('td')
   tdReceptor.textContent = receptor
   dataRow.appendChild(tdReceptor)
 
-  // Fecha de emisión
-  const tdFechaEmision = document.createElement('td')
-  tdFechaEmision.textContent = fechaEmision
-  dataRow.appendChild(tdFechaEmision)
+  const tdFecha = document.createElement('td')
+  tdFecha.textContent = fechaEmision
+  dataRow.appendChild(tdFecha)
 
-  Object.entries(listaImpuestos).forEach(([tarifa, info]) => {
-    // Encabezados
-    const th = document.createElement('th')
-    th.textContent = `Ventas al ${tarifa}%`
-    headerRow.appendChild(th)
+  let totalGeneral = 0
 
-    // Icono de información sobre la tarifa
-    const infoIcon = InfoToolTip('Subtotal + Impuesto correspondiente a esta tarifa.')
-    th.appendChild(infoIcon)
+  tarifas.forEach(tarifa => {
+    if (tarifa === '0') return
 
-    // Datos
-    const tdDataTotals = document.createElement('td')
-    tdDataTotals.textContent = info.totalTarifa
-    dataRow.appendChild(tdDataTotals)
-    tbody.appendChild(dataRow)
+    const tdCompras = document.createElement('td')
+    tdCompras.textContent = listaImpuestos[tarifa].subtotalTarifa.toFixed(2)
+    tdCompras.style.fontWeight = '600'
+    dataRow.appendChild(tdCompras)
+
+    const tdIVA = document.createElement('td')
+    tdIVA.textContent = listaImpuestos[tarifa].impuestoTarifa.toFixed(2)
+    tdIVA.style.fontWeight = '600'
+    tdIVA.style.color = '#d97706'
+    dataRow.appendChild(tdIVA)
+
+    totalGeneral += listaImpuestos[tarifa].totalTarifa
   })
 
-  // Total otros cargos, si aplica
-  if (dataFacturas.totalOtrosCargos) {
-    // Encabezado otros cargos
-    const thOtrosCargos = document.createElement('th')
-    thOtrosCargos.textContent = 'Total Otros Cargos'
-    headerRow.appendChild(thOtrosCargos)
-
-    // Datos otros cargos
-    const tdOtrosCargos = document.createElement('td')
-    tdOtrosCargos.textContent = dataFacturas.totalOtrosCargos
-    dataRow.appendChild(tdOtrosCargos)
-    tbody.appendChild(dataRow)
-
-    // Tooltip info otros cargos
-    const infoIconOtrosCargos = InfoToolTip('Total de otros cargos adicionales aplicados en la factura.')
-    thOtrosCargos.appendChild(infoIconOtrosCargos)
+  if (tieneExencion) {
+    const tdExonerado = document.createElement('td')
+    tdExonerado.textContent = listaImpuestos['0'].subtotalTarifa.toFixed(2)
+    tdExonerado.style.fontWeight = '600'
+    dataRow.appendChild(tdExonerado)
+    totalGeneral += listaImpuestos['0'].totalTarifa
   }
 
-  // Crear checkbox para seleccion de tablas
-  const checkTabla = document.createElement('input')
-  checkTabla.type = 'checkbox'
-  checkTabla.classList.add('btn-check')
-  checkTabla.id = `check-${idFactura}`
-  checkTabla.autocomplete = 'off'
+  const tdTotalFinal = document.createElement('td')
+  tdTotalFinal.textContent = totalGeneral.toFixed(2)
+  tdTotalFinal.style.fontWeight = '700'
+  tdTotalFinal.style.backgroundColor = '#f0fdf4'
+  tdTotalFinal.style.color = 'var(--primary-dark)'
+  tdTotalFinal.style.fontSize = '14px'
+  tdTotalFinal.style.padding = 'var(--spacing-md) var(--spacing-lg)'
+  dataRow.appendChild(tdTotalFinal)
 
-  // Crear el label del checkbox
-  const labelCheck = document.createElement('label')
-  labelCheck.classList.add('btn', 'btn-outline-primary')
-  labelCheck.setAttribute('for', `check-${idFactura}`)
-  labelCheck.textContent = 'Incluir en Reporte'
+  tbody.appendChild(dataRow)
+  return table
+}
 
-  // Evento al seleccionar el checkbox
-  checkTabla.addEventListener('change', (event) => { onCheckTable(event, { tabla: tablaContenidos, key: idFactura }) })
+function buildInvoiceOptions (idFactura, tablaContenidos, descartarFactura) {
+  const container = document.createElement('div')
+  container.className = 'factura-options'
 
-  // Crear boton para descartar la factura
-  const btnDescartarFactura = document.createElement('input')
-  btnDescartarFactura.type = 'button'
-  btnDescartarFactura.classList.add('btn', 'btn-danger')
-  btnDescartarFactura.id = `discard-${idFactura}`
-  btnDescartarFactura.value = 'Descartar Factura'
-  btnDescartarFactura.autocomplete = 'off'
+  const { wrapper } = CheckboxFactory.create(
+    `check-${idFactura}`,
+    'Incluir en Reporte',
+    (event) => onCheckTable(event, { tabla: tablaContenidos, key: idFactura })
+  )
 
-  // Evento para descartar la factura
-  btnDescartarFactura.addEventListener('click', (event) => { onDescartarFactura(event, idFactura, descartarFactura) })
+  const btnDiscard = ButtonFactory.create(
+    'Descartar Factura',
+    'danger',
+    'md',
+    (event) => onDescartarFactura(event, idFactura, descartarFactura)
+  )
 
-  // Ensamblamos la tabla de contenidos
-  tHeader.appendChild(headerRow)
-  tablaContenidos.appendChild(tHeader)
-  tablaContenidos.appendChild(tbody)
+  container.appendChild(wrapper)
+  container.appendChild(btnDiscard)
 
-  // Agregamos el nombre del archivo al contenedor principal de la factura
-  contenedorFactura.appendChild(h5nombreArchivo)
-
-  // Agregar checkbox y label al contenedor de opciones
-  contenedorOpciones.appendChild(checkTabla)
-  contenedorOpciones.appendChild(labelCheck)
-
-  // Agregar boton descartar al contenedor de opciones
-  contenedorOpciones.appendChild(btnDescartarFactura)
-
-  // Agregar contenedor de opciones al contenedor principal de la factura
-  contenedorFactura.appendChild(contenedorOpciones)
-
-  // Ensamblamos el contenedor de la factura
-  contenedorFactura.appendChild(tablaContenidos)
-
-  return contenedorFactura
+  return container
 }
 
 function onCheckTable (event, obTabla) {

@@ -1,58 +1,64 @@
+import { ButtonFactory, InputFactory, ContainerFactory } from '../utils/ComponentFactory.js'
+
 function crearFilterBetweenDates (callback) {
-  const contenedorFilter = document.createElement('div')
-  contenedorFilter.classList.add('filter-between-dates', 'd-flex', 'flex-column', 'gap-2', 'mt-2', 'mb-2', 'w-25')
+  const container = ContainerFactory.createFlex('column', 'md', 'filter-between-dates')
+  container.style.maxWidth = '300px'
+  container.style.padding = 'var(--spacing-lg)'
+  container.style.backgroundColor = 'var(--secondary-light)'
+  container.style.borderRadius = 'var(--radius-md)'
+  container.style.border = '1px solid var(--border-color)'
 
-  // Bolds
-  const boldFechaInicio = document.createElement('b')
-  boldFechaInicio.textContent = 'Fecha Inicio:'
-  const boldFechaFin = document.createElement('b')
-  boldFechaFin.textContent = 'Fecha Fin:'
+  const labelStart = document.createElement('label')
+  labelStart.textContent = 'Fecha de Inicio'
+  labelStart.style.marginBottom = 'var(--spacing-sm)'
 
-  // Input fecha inicio
-  const inputFechaInicio = document.createElement('input')
-  inputFechaInicio.type = 'date'
-  inputFechaInicio.classList.add('form-control', 'date-start-input')
-  inputFechaInicio.setAttribute('placeholder', 'Fecha inicio')
+  const dateInputStart = InputFactory.createDateInput('date-start-input')
 
-  // Input fecha fin
-  const inputFechaFin = document.createElement('input')
-  inputFechaFin.type = 'date'
-  inputFechaFin.classList.add('form-control', 'date-end-input')
-  inputFechaFin.setAttribute('placeholder', 'Fecha fin')
+  const labelEnd = document.createElement('label')
+  labelEnd.textContent = 'Fecha de Fin'
+  labelEnd.style.marginBottom = 'var(--spacing-sm)'
+  labelEnd.style.marginTop = 'var(--spacing-md)'
 
-  // Boton aplicar filtro
-  const btnAplicarFiltro = document.createElement('button')
-  btnAplicarFiltro.classList.add('btn', 'btn-primary', 'btn-apply-date-filter')
-  btnAplicarFiltro.textContent = 'Aplicar Filtro'
+  const dateInputEnd = InputFactory.createDateInput('date-end-input')
 
-  // Evento al hacer click en el boton de aplicar
-  btnAplicarFiltro.addEventListener('click', () => {
-    const fechaInicio = inputFechaInicio.value
-    const fechaFin = inputFechaFin.value
-    contenedorFilter.remove()
-    // Llamar al callback con las fechas seleccionadas
-    callback(fechaInicio, fechaFin)
-  })
+  const buttonContainer = document.createElement('div')
+  buttonContainer.className = 'd-flex gap-2'
+  buttonContainer.style.marginTop = 'var(--spacing-lg)'
 
-  // Boton descartar filtro
-  const btnDescartarFiltro = document.createElement('button')
-  btnDescartarFiltro.classList.add('btn', 'btn-secondary', 'btn-discard-date-filter')
-  btnDescartarFiltro.textContent = 'Descartar Filtro'
+  const btnApply = ButtonFactory.create(
+    'Aplicar',
+    'primary',
+    'md',
+    () => {
+      const inicio = dateInputStart.value
+      const fin = dateInputEnd.value
+      container.remove()
+      callback(inicio, fin)
+    },
+    'checkCircle'
+  )
 
-  // Evento al hacer click en el boton de descartar
-  btnDescartarFiltro.addEventListener('click', () => {
-    contenedorFilter.remove()
-    callback() // Indicar que se descarta el filtro
-  })
+  const btnDiscard = ButtonFactory.create(
+    'Cancelar',
+    'secondary',
+    'md',
+    () => {
+      container.remove()
+      callback()
+    },
+    'x'
+  )
 
-  // Ensamblar el contenedor
-  contenedorFilter.appendChild(boldFechaInicio)
-  contenedorFilter.appendChild(inputFechaInicio)
-  contenedorFilter.appendChild(boldFechaFin)
-  contenedorFilter.appendChild(inputFechaFin)
-  contenedorFilter.appendChild(btnAplicarFiltro)
-  contenedorFilter.appendChild(btnDescartarFiltro)
-  return contenedorFilter
+  buttonContainer.appendChild(btnApply)
+  buttonContainer.appendChild(btnDiscard)
+
+  container.appendChild(labelStart)
+  container.appendChild(dateInputStart)
+  container.appendChild(labelEnd)
+  container.appendChild(dateInputEnd)
+  container.appendChild(buttonContainer)
+
+  return container
 }
 
 export { crearFilterBetweenDates }
