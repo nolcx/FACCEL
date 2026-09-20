@@ -3,7 +3,6 @@ import { parseDate } from '../utils/DateOperations.js'
 function getDataFactura ({ XMLParseado, nombreArchivoXML = 'Archivo Desconocido' }) {
   return new Promise((resolve, reject) => {
     try {
-      console.log(XMLParseado)
       if (!XMLParseado) reject(new Error('No se ha proporcionado un XML válido.'))
       if (XMLParseado.MensajeHacienda) reject(new Error('El archivo proporcionado es una Respuesta de Hacienda.'))
       if (XMLParseado.TiqueteElectronico) reject(new Error('El archivo proporcionado es un Tiquete Electrónico.'))

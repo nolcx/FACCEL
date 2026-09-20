@@ -1,4 +1,4 @@
-import ExcelJS from 'exceljs'
+import ExcelJS from 'https://esm.sh/exceljs@4.4.0'
 
 const COLUMNAS_BASE = ['Fecha de Emisión', 'Consecutivo', 'Proveedor']
 
